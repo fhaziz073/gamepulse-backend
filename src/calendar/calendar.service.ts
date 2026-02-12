@@ -34,15 +34,39 @@ export class CalendarService {
       const gameEnd = new Date(gameStart.getTime() + gameLengthInMs);
       if (gameStart instanceof Date && !isNaN(gameStart.getTime())) {
         this.events.push({
-          start: gameStart.toString(),
-          end: gameEnd.toString(),
+          start:
+            game.date +
+            ' ' +
+            gameStart.getHours().toString().padStart(2, '0') +
+            ':' +
+            gameStart.getMinutes().toString().padStart(2, '0') +
+            ':' +
+            gameStart.getSeconds().toString().padStart(2, '0'),
+          end:
+            game.date +
+            ' ' +
+            gameEnd.getHours().toString().padStart(2, '0') +
+            ':' +
+            gameEnd.getMinutes().toString().padStart(2, '0') +
+            ':' +
+            gameEnd.getSeconds().toString().padStart(2, '0'),
           title: `${game.visitor_team.name} at ${game.home_team.name}`,
         });
       } else {
+        const currentTime = new Date();
+        const currentTimeString =
+          game.date +
+          ' ' +
+          currentTime.getHours().toString().padStart(2, '0') +
+          ':' +
+          currentTime.getMinutes().toString().padStart(2, '0') +
+          ':' +
+          currentTime.getSeconds().toString().padStart(2, '0');
         this.events.push({
-          start: game.date,
-          end: game.date,
+          start: currentTimeString,
+          end: currentTimeString,
           title: `${game.visitor_team.name} at ${game.home_team.name}`,
+          summary: game.status,
         });
       }
     }
