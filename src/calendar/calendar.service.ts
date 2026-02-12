@@ -32,11 +32,19 @@ export class CalendarService {
       const gameLengthInMs = 2.5 * 60 * 60 * 1000;
       const gameStart = new Date(game.status);
       const gameEnd = new Date(gameStart.getTime() + gameLengthInMs);
-      this.events.push({
-        start: gameStart.toString(),
-        end: gameEnd.toString(),
-        title: `${game.visitor_team.name} at ${game.home_team.name}`,
-      });
+      if (gameStart instanceof Date && !isNaN(gameStart.getTime())) {
+        this.events.push({
+          start: gameStart.toString(),
+          end: gameEnd.toString(),
+          title: `${game.visitor_team.name} at ${game.home_team.name}`,
+        });
+      } else {
+        this.events.push({
+          start: game.date,
+          end: game.date,
+          title: `${game.visitor_team.name} at ${game.home_team.name}`,
+        });
+      }
     }
     return this.events;
   }
