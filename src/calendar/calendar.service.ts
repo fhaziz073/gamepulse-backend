@@ -12,9 +12,9 @@ export type Event = {
 export class CalendarService {
   private apiKey = process.env.SPORTS_API_KEY as string;
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
-  private readonly events: Event[] = [];
 
   async findAll(): Promise<Event[]> {
+    const events: Event[] = [];
     let date1 = new Date();
     const offset = date1.getTimezoneOffset();
     date1 = new Date(date1.getTime() - offset * 60 * 1000);
@@ -33,7 +33,7 @@ export class CalendarService {
       const gameStart = new Date(game.status);
       const gameEnd = new Date(gameStart.getTime() + gameLengthInMs);
       if (gameStart instanceof Date && !isNaN(gameStart.getTime())) {
-        this.events.push({
+        events.push({
           start:
             game.date +
             ' ' +
@@ -62,7 +62,7 @@ export class CalendarService {
           currentTime.getMinutes().toString().padStart(2, '0') +
           ':' +
           currentTime.getSeconds().toString().padStart(2, '0');
-        this.events.push({
+        events.push({
           start: currentTimeString,
           end: currentTimeString,
           title: `${game.visitor_team.name} at ${game.home_team.name}`,
@@ -70,6 +70,6 @@ export class CalendarService {
         });
       }
     }
-    return this.events;
+    return events;
   }
 }
