@@ -1,5 +1,4 @@
 import { Controller, Get } from '@nestjs/common';
-import type { Request } from 'express';
 import { CalendarService, Event } from './calendar.service';
 @Controller('calendar')
 export class CalendarController {
