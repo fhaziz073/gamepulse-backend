@@ -1,11 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
-import { LoginService } from './login.service';
-
+import { Controller, Get, Body } from '@nestjs/common';
+import { CreateUserDto } from './bodyDto';
 @Controller('login')
 export class LoginController {
-  constructor(private loginService: LoginService) {}
+  constructor() {}
   @Get()
-  findUpcomingGames() {
-    return this.loginService.getUser();
+  loginUser(@Body() body: CreateUserDto) {
+    const username = body.username;
+    //Get user from Advait and Drayton's user route
+    //Stopgap solution is doing it manually from controller
+    return 1;
   }
 }
