@@ -145,6 +145,7 @@ ALTER TABLE public."Team Table" OWNER TO postgres;
 CREATE TABLE public."User Table" (
     "User ID" uuid,
     "Username" text,
+    "Password" test,
     "Email" text,
     "Avatar URL" text,
     "Creation Time" timestamp with time zone
