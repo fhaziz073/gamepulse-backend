@@ -53,8 +53,9 @@ ALTER TABLE public."Betting Table" OWNER TO postgres;
 CREATE TABLE public."Game Table" (
     id integer,
     date text,
-    "Home Team ID" integer,
-    "Away Team ID" integer,
+    status text,
+    home_team_id integer,
+    visitor_team_id integer,
     season integer,
     home_q1 integer,
     home_q2 integer,
