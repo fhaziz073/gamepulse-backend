@@ -1,66 +1,168 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  avatarUrl: string;
-  createdAt: Date;
-  showA: boolean;
-  showM: boolean;
-  showR: boolean;
-  showP: boolean;
-}
+import { gpdb } from './gamepulse_database';
 
 @Injectable()
 export class UserService {
-    private users: User[] = [];
 
-  createUser(username: string, email: string, avatarUrl: string): User {
-    const user: User = {
-      id: randomUUID(),
-      username,
-      email,
-      avatarUrl,
-      createdAt: new Date(),
-      showA: true,
-      showM: true,
-      showR: true,
-      showP: true
-    };
-
-    this.users.push(user);
-    return user;
+  async getUserFromDB(userId: number) {
+    const result = await gpdb.query(
+      `SELECT * FROM "Team Table" WHERE id = $1`,
+      [userId]
+    );
+    return result.rows[0];
   }
 
-  getUser(id: string): User | undefined {
-    return this.users.find(user => user.id === id);
+  async upsertUser(user: any) {
+    const query = `
+      INSERT INTO "User Table"
+      (User ID, Username, Password, Email, Avatar URL, Creation Time)
+      VALUES ($1,$2,$3,$4,$5,$6)
+      ON CONFLICT (id) DO UPDATE SET
+        first_name = EXCLUDED.first_name,
+        last_name = EXCLUDED.last_name,
+        position = EXCLUDED.position,
+        height = EXCLUDED.height,
+        weight = EXCLUDED.weight
+    `;
+
+    const values = [
+      user.UserID,
+      user.Username,
+      user.Password,
+      user.Email,
+      user.AvatarURL,
+      user.CreationTime,
+    ];
+
+    await gpdb.query(query, values);
+  }
+
+  async getUserById(userId: number) {
+    const existing = await this.getUserFromDB(userId);
+    if (existing) {
+      return existing;
+    } 
+    const user;
+
+    await this.upsertUser(user);
+
+    return await this.getUserFromDB(userId);
   }
 
   setUsername(id: string, newUsername: string): void {
-    const user = this.getUser(id);
-    if (user) user.username = newUsername;
+        const query = `
+      UPDATE "User Table"
+      SET Username = $1
+      WHERE id = $2
+    `;
+
+    const values = [
+      newUsername, id
+    ];
+
+    await gpdb.query(query, values);
+  }
+
+  setPassword(id: string, newPassword: string): void {
+        const query = `
+      UPDATE "User Table"
+      SET Password = $1
+      WHERE id = $2
+    `;
+
+    const values = [
+      newPassword, id
+    ];
+
+    await gpdb.query(query, values);
   }
 
   setEmail(id: string, newEmail: string): void {
-    const user = this.getUser(id);
-    if (user) user.email = newEmail;
+        const query = `
+      UPDATE "User Table"
+      SET Email = $1
+      WHERE id = $2
+    `;
+
+    const values = [
+      newEmail, id
+    ];
+
+    await gpdb.query(query, values);
   }
 
   setAvatarUrl(id: string, newUrl: string): void {
-    const user = this.getUser(id);
-    if (user) user.avatarUrl = newUrl;
+              const query = `
+      UPDATE "User Table"
+      SET Avatar URL = $1
+      WHERE id = $2
+    `;
+
+    const values = [
+      newUrl, id
+    ];
+
+    await gpdb.query(query, values);
   }
 
-  changePreferences(id: string, a: boolean, m: boolean, r: boolean, p: boolean): void {
-    const user = this.getUser(id);
-    if (user) user.showA = a, user.showM = m, user.showP = p, user.showR = r;
-    if (user && user.showA) 
-    if (user && user.showM)
-    if (user && user.showP)
-    if (user && user.showR) 
+  logIn(username: string, password: string) {
+     const query = `
+      SELECT "User ID"
+      FROM "User Table"
+      WHERE "Username" = $1 AND "Password" = $2
+    `;
+
+    const values = [
+      username, password
+    ];
+
+        await gpdb.query(query, values);
   }
+
+  async upsertPreferenceTable(userId: number) {
+    const query = `
+      INSERT INTO "Preference Table"
+      ("User ID" uuid, "Games Starting Notif Pref" boolean, "Ongoing Close Games Notif Pref" boolean, "Favorite Teams" json, "Favorite Players" json)
+      VALUES ($1,$2,$3,$4,$5);
+    `
+    const values = [
+      userId, false, false, null, null
+    ];
+
+    await gpdb.query(query, values);
+  }
+
+  async changeGS(userId: number, newBool: boolean) {
+    const query = 
+     ` UPDATE "Preference Table"
+       SET "Games Starting Notif Pref" = $1
+       WHERE id = $2
+    `;
+    const values = [
+      newBool, userId
+    ];
+
+    await gpdb.query(query, values);
+  }
+
+  async changeOGC(userId: number, newBool: boolean) {
+    const query = 
+     ` UPDATE "Preference Table"
+       SET "Ongoing Close Games Notif Pref" = $1
+       WHERE id = $2
+    `;
+    const values = [
+      newBool, userId
+    ];
+
+    await gpdb.query(query, values);
+  }
+
+
+
+}
+  
 
 
 

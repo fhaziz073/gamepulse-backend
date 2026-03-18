@@ -3,38 +3,62 @@ import { randomUUID } from 'crypto';
 import { Game } from './game.service';
 import { BalldontlieAPI } from '@balldontlie/sdk';
 import { Player } from './player.service';
+import { gpdb } from './gamepulse_database';
 
-export interface Team {
-  id: string;
-  teamName: string;
-  colorHex: string;
-  season: Game[];
-  players: Player[];
-}
 
 @Injectable()
 export class TeamService {
   private apiKey = process.env.SPORTS_API_KEY as string;
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
-  private teams: Team[] = [];
 
-  async getTeamByName(teamName: string): Promise<string> {
-    const team = await this.api.nba.getTeams({ teams: teamName });
-    return team;
+  async getTeamFromDB(teamId: number) {
+    const result = await gpdb.query(
+      `SELECT * FROM "Team Table" WHERE id = $1`,
+      [teamId]
+    );
+    return result.rows[0];
   }
 
-  async getTeamById(teamId: string): Promise<string> {
-    const team = await this.api.nba.getTeams({ id: teamId });
-    return team;
+  async upsertGame(team: any) {
+    const query = `
+      INSERT INTO "Team Table"
+      (id integer, name text, full_name text, abbreviation text, city text, conference text,division text, hex_code text)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      `;
+
+    const values = [
+      team.id,
+      team.name,
+      team.full_name,
+      team.abbreviation,
+      team.city,
+      team.conference,
+      team.division,
+      team.hex_code
+    ];
+
+    await gpdb.query(query, values);
   }
 
-  async getSeasons(id: string): Promise<Game[]> {
-    const games = await this.api.nba.getGames({ teamId: id });
-    return games;
+  async getTeamById(teamId: number) {
+        const existing = await this.getTeamFromDB(teamId);
+    if (existing) {
+      return existing;
+    } 
+    const response = await this.api.nba.getTeam({ id: teamId });
+    const game = response.data[0];
+
+    if (!game) {
+      return null;
+    }
+
+    await this.upsertGame(game);
+
+    return await this.getTeamFromDB(teamId);
   }
 
-  async getPlayers(id: string): Promise<Player[]> {
-    const players = await this.api.nba.getPlayers({ teamId: id });
+  async getPlayers(id: number) {
+    const players = await  fetch ("https://api.balldontlie.io/v1/players?team_ids[]=$1", id);
     return players;
   }
 
