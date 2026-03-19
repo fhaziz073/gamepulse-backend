@@ -50,7 +50,7 @@ export class UserService {
     return await this.getUserFromDB(userId);
   }
 
-  setUsername(id: string, newUsername: string): void {
+  async setUsername(id: string, newUsername: string): Promise<void> {
         const query = `
       UPDATE "User Table"
       SET Username = $1
@@ -64,7 +64,7 @@ export class UserService {
     await gpdb.query(query, values);
   }
 
-  setPassword(id: string, newPassword: string): void {
+  async setPassword(id: string, newPassword: string): Promise<void> {
         const query = `
       UPDATE "User Table"
       SET Password = $1
@@ -78,8 +78,8 @@ export class UserService {
     await gpdb.query(query, values);
   }
 
-  setEmail(id: string, newEmail: string): void {
-        const query = `
+  async setEmail(id: string, newEmail: string): Promise<void> {
+    const query = `
       UPDATE "User Table"
       SET Email = $1
       WHERE id = $2
@@ -92,8 +92,8 @@ export class UserService {
     await gpdb.query(query, values);
   }
 
-  setAvatarUrl(id: string, newUrl: string): void {
-              const query = `
+  async setAvatarUrl(id: string, newUrl: string): Promise<void> {
+    const query = `
       UPDATE "User Table"
       SET Avatar URL = $1
       WHERE id = $2
@@ -106,7 +106,7 @@ export class UserService {
     await gpdb.query(query, values);
   }
 
-  logIn(username: string, password: string) {
+  async logIn(username: string, password: string) {
      const query = `
       SELECT "User ID"
       FROM "User Table"
@@ -162,11 +162,4 @@ export class UserService {
 
  
 }
-  
 
-
-
-
-
-  
-}
