@@ -159,7 +159,34 @@ export class UserService {
     await gpdb.query(query, values);
   }
 
+  async addFavoriteTeam(userId: number, team: string): Promise<void> {
+  const query = `
+    UPDATE "Preference Table"
+    SET "Favorite Teams" = 
+      COALESCE("Favorite Teams", '[]'::jsonb) || to_jsonb($1::text)
+    WHERE "User ID" = $2
+  `;
 
+  const values = [team, userId];
+
+  await gpdb.query(query, values);
+  }
+
+  async removeFavoriteTeam(userId: number, team: string): Promise<void> {
+  const query = `
+    UPDATE "Preference Table"
+    SET "Favorite Teams" = (
+      SELECT jsonb_agg(value)
+      FROM jsonb_array_elements("Favorite Teams"::jsonb) AS value
+      WHERE value != to_jsonb($1::text)
+    )
+    WHERE "User ID" = $2
+  `;
+
+  const values = [team, userId];
+
+  await gpdb.query(query, values);
+}
  
 }
 
