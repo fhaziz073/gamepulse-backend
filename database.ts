@@ -39,7 +39,7 @@ export async function createDatabase() {
       const dbClient = new Client({ ...adminConfig, database: DB_NAME });
       await dbClient.connect();
       await dbClient.query(schemaSql);
-      const resp = await dbClient.query(`SELECT * FROM Player;`);
+      const resp = await dbClient.query(`SELECT * FROM public."Player Table";`);
       console.log(resp);
       await dbClient.end();
     } else {
