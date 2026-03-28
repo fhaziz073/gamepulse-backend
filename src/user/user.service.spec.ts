@@ -27,6 +27,8 @@ describe('UserService', () => {
       'Avatar URL': 'avatar.png',
       'User ID': randomUUID(),
       'Creation Time': new Date(),
+      Password: 'password1',
+      'Notification Token': 'token1',
     });
     const user = await service.logIn('john', '');
     expect(user).toBeDefined();

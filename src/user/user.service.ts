@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { UUID } from 'node:crypto';
 import { Pool } from 'pg';
 import { PG_CONNECTION } from 'src/database/database.module';
 export type User = {
@@ -7,14 +8,16 @@ export type User = {
   Email: string;
   'Avatar URL': string;
   'Creation Time': Date;
+  Password: string;
+  'Notification Token': string;
 };
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
-  async getUserFromDB(userId: number): Promise<User | null> {
+  async getUserFromDB(userId: UUID): Promise<User | null> {
     try {
       const result = await this.pool.query(
-        `SELECT * FROM "User Table" WHERE id = ${userId}`,
+        `SELECT * FROM "User Table" WHERE "User ID" = ${userId}`,
         [userId],
       );
       return result.rows[0] as User;
@@ -27,9 +30,9 @@ export class UserService {
   async upsertUser(user: User) {
     const query = `
   INSERT INTO "User Table" 
-    ("User ID", "Username", "Email", "Avatar URL", "Creation Time")
+    ("User ID", "Username", "Email", "Avatar URL", "Creation Time", "Password", "Notification Token")
   VALUES 
-    ($1, $2, $3, $4, $5)
+    ($1, $2, $3, $4, $5, $6, $7)
   ON CONFLICT ("Username") DO UPDATE SET
     "Email" = EXCLUDED."Email",
     "Avatar URL" = EXCLUDED."Avatar URL";
@@ -40,6 +43,8 @@ export class UserService {
       user.Email,
       user['Avatar URL'],
       user['Creation Time'],
+      user.Password,
+      user['Notification Token'],
     ];
     try {
       await this.pool.query(query, values);
@@ -48,11 +53,11 @@ export class UserService {
     }
   }
 
-  async setUsername(id: string, newUsername: string): Promise<void> {
+  async setUsername(id: UUID, newUsername: string): Promise<void> {
     const query = `
       UPDATE "User Table"
       SET Username = $1
-      WHERE id = $2
+      WHERE "User ID" = $2
     `;
 
     const values = [newUsername, id];
@@ -67,7 +72,7 @@ export class UserService {
     const query = `
       UPDATE "User Table"
       SET Password = $1
-      WHERE id = $2
+      WHERE Username = $2
     `;
 
     const values = [newPassword, id];
@@ -83,7 +88,7 @@ export class UserService {
     const query = `
       UPDATE "User Table"
       SET Email = $1
-      WHERE id = $2
+      WHERE Username = $2
     `;
 
     const values = [newEmail, id];
@@ -99,7 +104,7 @@ export class UserService {
     const query = `
       UPDATE "User Table"
       SET Avatar URL = $1
-      WHERE id = $2
+      WHERE Username = $2
     `;
 
     const values = [newUrl, id];
@@ -115,10 +120,10 @@ export class UserService {
     const query = `
       SELECT "User ID"
       FROM "User Table"
-      WHERE "Username" = $1 
+      WHERE "Username" = $1 AND "Password" = $2
     `;
 
-    const values = [username];
+    const values = [username, password];
 
     try {
       const results = await this.pool.query(query, values);
@@ -206,26 +211,6 @@ export class UserService {
       await this.pool.query(query, values);
     } catch {
       console.log('Failed Favorite Team Deletion Operation');
-    }
-  }
-  async InsertUser(user: User) {
-    const query = `
-  INSERT INTO "User Table" 
-    ("User ID", "Username", "Email", "Avatar URL", "Creation Time")
-  VALUES 
-    ($1, $2, $3, $4, $5);
-`;
-    const values = [
-      user['User ID'],
-      user.Username,
-      user.Email,
-      user['Avatar URL'],
-      user['Creation Time'],
-    ];
-    try {
-      await this.pool.query(query, values);
-    } catch (error) {
-      console.error('Failed Upsert Operation:', error);
     }
   }
 }

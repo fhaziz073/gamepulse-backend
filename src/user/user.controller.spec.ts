@@ -29,8 +29,13 @@ describe('UserController', () => {
         username: 'john',
         email: 'john@test.com',
         avatarUrl: 'avatar.png',
+        password: 'password1',
+        notif_token: 'token1',
       });
-      const user = await userController.getUser('john');
+      const user = await userController.getUser({
+        username: 'john',
+        password: 'password1',
+      });
       expect(user?.Username).toBe('john');
     });
   });
