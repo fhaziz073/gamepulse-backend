@@ -5,7 +5,7 @@
 -- Dumped from database version 16.6
 -- Dumped by pg_dump version 16.6
 
--- Started on 2026-03-03 15:53:49
+-- Started on 2026-03-28 13:32:14
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -143,18 +143,20 @@ ALTER TABLE public."Team Table" OWNER TO postgres;
 --
 
 CREATE TABLE public."User Table" (
-    "User ID" uuid,
-    "Username" text,
-    "Email" text,
+    "User ID" uuid NOT NULL,
     "Avatar URL" text,
-    "Creation Time" timestamp with time zone
+    "Creation Time" timestamp with time zone,
+    "Password" character varying,
+    "Notification Token" character varying,
+    "Username" text,
+    "Email" text
 );
 
 
 ALTER TABLE public."User Table" OWNER TO postgres;
 
 --
--- TOC entry 4801 (class 0 OID 24617)
+-- TOC entry 4807 (class 0 OID 24617)
 -- Dependencies: 220
 -- Data for Name: Betting Table; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -164,7 +166,7 @@ COPY public."Betting Table" (id, game_id, vendor, spread_home_value, spread_home
 
 
 --
--- TOC entry 4798 (class 0 OID 24602)
+-- TOC entry 4804 (class 0 OID 24602)
 -- Dependencies: 217
 -- Data for Name: Game Table; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -174,7 +176,7 @@ COPY public."Game Table" (id, date, "Home Team ID", "Away Team ID", season, home
 
 
 --
--- TOC entry 4800 (class 0 OID 24612)
+-- TOC entry 4806 (class 0 OID 24612)
 -- Dependencies: 219
 -- Data for Name: Player Table; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -184,7 +186,7 @@ COPY public."Player Table" (id, first_name, last_name, "position", height, weigh
 
 
 --
--- TOC entry 4797 (class 0 OID 24597)
+-- TOC entry 4803 (class 0 OID 24597)
 -- Dependencies: 216
 -- Data for Name: Preference Table; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -194,7 +196,7 @@ COPY public."Preference Table" ("User ID", "Games Starting Notif Pref", "Ongoing
 
 
 --
--- TOC entry 4799 (class 0 OID 24607)
+-- TOC entry 4805 (class 0 OID 24607)
 -- Dependencies: 218
 -- Data for Name: Team Table; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -204,16 +206,43 @@ COPY public."Team Table" (id, name, full_name, abbreviation, city, conference, d
 
 
 --
--- TOC entry 4796 (class 0 OID 24592)
+-- TOC entry 4802 (class 0 OID 24592)
 -- Dependencies: 215
 -- Data for Name: User Table; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."User Table" ("User ID", "Username", "Email", "Avatar URL", "Creation Time") FROM stdin;
+COPY public."User Table" ("User ID", "Avatar URL", "Creation Time", "Password", "Notification Token", "Username", "Email") FROM stdin;
 \.
 
 
--- Completed on 2026-03-03 15:53:50
+--
+-- TOC entry 4654 (class 2606 OID 24629)
+-- Name: User Table Unique Email; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."User Table"
+    ADD CONSTRAINT "Unique Email" UNIQUE ("Email");
+
+
+--
+-- TOC entry 4656 (class 2606 OID 24627)
+-- Name: User Table Unique Username; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."User Table"
+    ADD CONSTRAINT "Unique Username" UNIQUE ("Username");
+
+
+--
+-- TOC entry 4658 (class 2606 OID 24625)
+-- Name: User Table User Table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."User Table"
+    ADD CONSTRAINT "User Table_pkey" PRIMARY KEY ("User ID");
+
+
+-- Completed on 2026-03-28 13:32:14
 
 --
 -- PostgreSQL database dump complete
