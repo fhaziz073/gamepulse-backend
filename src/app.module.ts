@@ -7,9 +7,10 @@ import { LoginController } from './login/login.controller';
 import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
 import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, AuthModule],
   controllers: [
     AppController,
     CalendarController,

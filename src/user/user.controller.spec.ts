@@ -24,19 +24,8 @@ describe('UserController', () => {
   });
 
   describe('root', () => {
-    it('should create and get a user', async () => {
-      await userController.createUser({
-        username: 'john',
-        email: 'john@test.com',
-        avatarUrl: 'avatar.png',
-        password: 'password1',
-        notif_token: 'token1',
-      });
-      const user = await userController.getUser({
-        username: 'john',
-        password: 'password1',
-      });
-      expect(user?.Username).toBe('john');
+    it('should be defined', () => {
+      expect(userController).toBeDefined();
     });
   });
 });

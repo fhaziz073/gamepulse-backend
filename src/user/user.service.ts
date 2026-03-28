@@ -14,10 +14,10 @@ export type User = {
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
-  async getUserFromDB(userId: UUID): Promise<User | null> {
+  async getUserFromDB(userId: string): Promise<User | null> {
     try {
       const result = await this.pool.query(
-        `SELECT * FROM "User Table" WHERE "User ID" = ${userId}`,
+        `SELECT * FROM "User Table" WHERE "Username" = $1`,
         [userId],
       );
       return result.rows[0] as User;

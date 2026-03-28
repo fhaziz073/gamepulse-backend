@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { randomUUID } from 'node:crypto';
 
@@ -26,10 +26,5 @@ export class UserController {
       Password: body.password,
       'Notification Token': body.notif_token,
     });
-  }
-
-  @Get()
-  async getUser(@Body() body: { username: string; password: string }) {
-    return await this.userService.logIn(body.username, body.password);
   }
 }
