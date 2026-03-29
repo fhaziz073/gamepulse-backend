@@ -213,4 +213,15 @@ export class UserService {
       console.log('Failed Favorite Team Deletion Operation');
     }
   }
+  async getUsers() {
+    try {
+      const result = await this.pool.query(
+        `SELECT "Username" FROM "User Table"`,
+      );
+      return result.rows as string[];
+    } catch {
+      console.log("Can't connect to database");
+    }
+    return null;
+  }
 }
