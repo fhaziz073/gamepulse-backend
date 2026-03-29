@@ -8,6 +8,7 @@ import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
+import { MigrationService } from './migration/migration.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule],
@@ -17,6 +18,6 @@ import { AuthModule } from './auth/auth.module';
     LoginController,
     UserController,
   ],
-  providers: [AppService, CalendarService, UserService],
+  providers: [AppService, CalendarService, UserService, MigrationService],
 })
 export class AppModule {}
