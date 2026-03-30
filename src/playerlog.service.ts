@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { GameService } from './game.service';
 import { BalldontlieAPI } from '@balldontlie/sdk';
-import { Player, PlayerService } from './player.service';
 
 export interface PlayerLog {
   id: string;
@@ -50,10 +49,10 @@ export class PlayerLogService {
       headers: { Authorization: this.apiKey }
     });
 
-    return response.data; // TypeScript knows this is PlayerProp[]
+    return response.data; 
   } catch (error) {
     console.error(error);
-    return 0; // optional, matches the declared Promise type
+    return 0; 
   }
 }
 
@@ -64,10 +63,10 @@ export class PlayerLogService {
       headers: { Authorization: this.apiKey }
     });
 
-    return response.data; // TypeScript knows this is PlayerProp[]
+    return response.data; 
   } catch (error) {
     console.error(error);
-    return 0; // optional, matches the declared Promise type
+    return 0; 
   }
 }
   async getMinutesProps(playerId: string, gameId: string): Promise<number> {
@@ -77,10 +76,10 @@ export class PlayerLogService {
       headers: { Authorization: this.apiKey }
     });
 
-    return response.data; // TypeScript knows this is PlayerProp[]
+    return response.data;
   } catch (error) {
     console.error(error);
-    return 0; // optional, matches the declared Promise type
+    return 0; 
   }
 }
   

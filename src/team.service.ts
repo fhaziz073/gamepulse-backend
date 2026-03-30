@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Game } from './game.service';
 import { BalldontlieAPI } from '@balldontlie/sdk';
-import { Player } from './player.service';
 import { gpdb } from './gamepulse_database';
 
 
