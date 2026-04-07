@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { GameService } from './game.service';
+import { GameService } from '../game/game.service';
 import { BalldontlieAPI } from '@balldontlie/sdk';
 
 export interface PlayerLog {
