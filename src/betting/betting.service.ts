@@ -58,7 +58,7 @@ export class BettingService {
     if (existing) {
       return existing;
     } 
-    const response = await this.api.nba.getBettingOdds({ id: bettingId });
+    const response = await this.api.nba.getBettingOdds(bettingId);
     const betting = response.data[0];
 
     if (!betting) {

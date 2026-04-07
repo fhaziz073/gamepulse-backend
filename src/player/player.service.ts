@@ -53,7 +53,7 @@ export class PlayerService {
     if (existing) {
       return existing;
     } 
-    const response = await this.api.nba.getPlayers({ id: playerId });
+    const response = await this.api.nba.getPlayers(playerId);
     const player = response.data[0];
 
     if (!player) {

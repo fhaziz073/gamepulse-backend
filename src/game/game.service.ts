@@ -65,7 +65,7 @@ export class GameService {
     if (existing) {
       return existing;
     } 
-    const response = await this.api.nba.getGame({ id: gameId });
+    const response = await this.api.nba.getGame(gameId);
     const game = response.data[0];
 
     if (!game) {
