@@ -134,17 +134,30 @@ export class UserService {
     return null;
   }
 
-  async upsertPreferenceTable(userId: number) {
+  async upsertPreferenceTable(
+    userId: number,
+    gameStartNotifPref: boolean,
+    ongoingGameNotifPref: boolean,
+    favTeams: object,
+    favPlayers: object,
+  ) {
     const query = `
       INSERT INTO "Preference Table"
-      ("User ID" uuid, "Games Starting Notif Pref" boolean, "Ongoing Close Games Notif Pref" boolean, "Favorite Teams" json, "Favorite Players" json)
+      ("User ID", "Games Starting Notif Pref", "Ongoing Close Games Notif Pref", "Favorite Teams", "Favorite Players")
       VALUES ($1,$2,$3,$4,$5);
     `;
-    const values = [userId, false, false, null, null];
+    const values = [
+      userId,
+      gameStartNotifPref,
+      ongoingGameNotifPref,
+      JSON.stringify(favTeams),
+      JSON.stringify(favPlayers),
+    ];
 
     try {
       await this.pool.query(query, values);
-    } catch {
+    } catch (e) {
+      console.log(e);
       console.log('Failed Preference Tables Update Operation');
     }
   }

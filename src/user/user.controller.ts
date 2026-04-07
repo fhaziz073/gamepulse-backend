@@ -27,6 +27,25 @@ export class UserController {
       'Notification Token': body.notif_token,
     });
   }
+  @Post('pref')
+  async createUserPreferences(
+    @Body()
+    body: {
+      userId: number;
+      gameStartNotifPref: boolean;
+      ongoingGameNotifPref: boolean;
+      favTeams: JSON;
+      favPlayers: JSON;
+    },
+  ) {
+    await this.userService.upsertPreferenceTable(
+      body.userId,
+      body.gameStartNotifPref,
+      body.ongoingGameNotifPref,
+      body.favTeams,
+      body.favPlayers,
+    );
+  }
   @Get()
   async getAllUsers() {
     return await this.userService.getUsers();
