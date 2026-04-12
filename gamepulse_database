@@ -12,28 +12,16 @@
 -- Name: Betting Table; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public."Betting Table" (
+CREATE TABLE public."Team Table" (
     id integer,
-    game_id integer,
-    vendor text,
-    spread_home_value text,
-    spread_home_odds integer,
-    spread_away_value text,
-    spread_away_odds integer,
-    moneyline_home_odds integer,
-    moneyline_away_odds integer,
-    total_value text,
-    total_over_odds integer,
-    total_under_odds integer
+    name text,
+    full_name text,
+    abbreviation text,
+    city text,
+    conference text,
+    division text,
+    hex_code text
 );
-
-
-ALTER TABLE public."Betting Table" OWNER TO postgres;
-
---
--- TOC entry 217 (class 1259 OID 24602)
--- Name: Game Table; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE TABLE public."Game Table" (
     id integer,
@@ -60,14 +48,6 @@ CREATE TABLE public."Game Table" (
     postseason boolean,
     postponed boolean
 );
-
-
-ALTER TABLE public."Game Table" OWNER TO postgres;
-
---
--- TOC entry 219 (class 1259 OID 24612)
--- Name: Player Table; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE TABLE public."Player Table" (
     id integer,
@@ -200,20 +180,8 @@ ALTER TABLE ONLY public."Preference Table"
 ALTER TABLE ONLY public."User Table"
     ADD CONSTRAINT "Unique Email" UNIQUE ("Email");
 
-
---
--- TOC entry 4656 (class 2606 OID 24627)
--- Name: User Table Unique Username; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public."User Table"
     ADD CONSTRAINT "Unique Username" UNIQUE ("Username");
-
-
---
--- TOC entry 4658 (class 2606 OID 24625)
--- Name: User Table User Table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public."User Table"
     ADD CONSTRAINT "User Table_pkey" PRIMARY KEY ("User ID");
