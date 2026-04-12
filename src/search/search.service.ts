@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { gpdb } from './gamepulse_database';
+import { Inject, Injectable } from '@nestjs/common';
+import { Pool } from 'pg';
+import { PG_CONNECTION } from 'src/database/database.module';
 
 @Injectable()
 export class SearchService {
-
+  constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
   async searchGame(searchTerm: string) {
     const query = `
       SELECT *
@@ -11,7 +12,7 @@ export class SearchService {
       WHERE LOWER("Game Name") LIKE LOWER($1)
     `;
     const values = [`%${searchTerm}%`];
-    const result = await gpdb.query(query, values);
+    const result = await this.pool.query(query, values);
     return result.rows;
   }
 
@@ -22,7 +23,7 @@ export class SearchService {
       WHERE LOWER("Team Name") LIKE LOWER($1)
     `;
     const values = [`%${searchTerm}%`];
-    const result = await gpdb.query(query, values);
+    const result = await this.pool.query(query, values);
     return result.rows;
   }
 
@@ -33,7 +34,7 @@ export class SearchService {
       WHERE LOWER("Player Name") LIKE LOWER($1)
     `;
     const values = [`%${searchTerm}%`];
-    const result = await gpdb.query(query, values);
+    const result = await this.pool.query(query, values);
     return result.rows;
   }
 }

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BettingController } from './betting.controller';
 import { BettingService } from './betting.service';
- 
+
 describe('BettingController', () => {
   let bettingController: BettingController;
   let bettingService: BettingService;
@@ -15,6 +15,4 @@ describe('BettingController', () => {
     bettingController = module.get<BettingController>(BettingController);
     bettingService = module.get<BettingService>(BettingService);
   });
-
 });
-

@@ -1,18 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { BalldontlieAPI } from '@balldontlie/sdk';
-import { gpdb } from './gamepulse_database';
-
+import { BalldontlieAPI, NBAPlayer } from '@balldontlie/sdk';
+import { PG_CONNECTION } from 'src/database/database.module';
+import { Pool } from 'pg';
 
 @Injectable()
 export class PlayerService {
+  constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
   private apiKey = process.env.SPORTS_API_KEY as string;
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
-  
+
   async getPlayerFromDB(playerId: number) {
-    const result = await gpdb.query(
+    const result = await this.pool.query(
       `SELECT * FROM "Player Table" WHERE id = $1`,
-      [playerId]
+      [playerId],
     );
     return result.rows[0];
   }
@@ -45,15 +46,15 @@ export class PlayerService {
       player.draft_number,
     ];
 
-    await gpdb.query(query, values);
+    await this.pool.query(query, values);
   }
 
   async getPlayerById(playerId: number) {
     const existing = await this.getPlayerFromDB(playerId);
     if (existing) {
       return existing;
-    } 
-    const response = await this.api.nba.getPlayers(playerId);
+    }
+    const response = await this.api.nba.getPlayer(playerId);
     const player = response.data[0];
 
     if (!player) {
@@ -65,8 +66,8 @@ export class PlayerService {
     return await this.getPlayerFromDB(playerId);
   }
 
-  async getPlayerByName(playerName: string): Promise<string> {
-    const response = await this.api.nba.getPlayers({ players: playerName });
+  async getPlayerByName(playerName: string): Promise<NBAPlayer[]> {
+    const response = await this.api.nba.getPlayers({ first_name: playerName });
 
     const players = response.data;
 
@@ -76,8 +77,13 @@ export class PlayerService {
   }
 
   async getSeason(playerId: number) {
-    const player = await BalldontlieAPI.nba.getAdvancedStats({ seasons: `${new Date().getFullYear()}` });
-    return player?.seasons;
+    // const player = await BalldontlieAPI.nba.getAdvancedStats({
+    //   seasons: `${new Date().getFullYear()}`,
+    // });
+    const player = await this.api.nba.getAdvancedStats({
+      seasons: [new Date().getFullYear()],
+    });
+    return player.data;
   }
 
   async getHeight(playerId: number) {
@@ -89,6 +95,4 @@ export class PlayerService {
     const player = await this.getPlayerById(playerId);
     return player?.weight;
   }
-
-
 }

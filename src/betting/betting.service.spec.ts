@@ -3,7 +3,7 @@ import { BettingService } from './betting.service';
 
 describe('UserService', () => {
   let service: UserService;
- 
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [UserService],

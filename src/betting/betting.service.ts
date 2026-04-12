@@ -1,17 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { gpdb } from './gamepulse_database';
+import { Inject, Injectable } from '@nestjs/common';
 import { BalldontlieAPI } from '@balldontlie/sdk';
-
+import { Pool } from 'pg';
+import { PG_CONNECTION } from 'src/database/database.module';
 @Injectable()
 export class BettingService {
+  constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
   private apiKey = process.env.SPORTS_API_KEY as string;
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
-  
+
   async getBettingTableFromDB(betId: number) {
-    const result = await gpdb.query(
+    const result = await this.pool.query(
       `SELECT * FROM "Betting Table" WHERE id = $1`,
-      [betId]
+      [betId],
     );
     return result.rows[0];
   }
@@ -39,26 +39,29 @@ export class BettingService {
       betting.id,
       betting.game_id,
       betting.vendor,
-      betting.spread_home_value, 
-      betting.spread_home_odds, 
-      betting.spread_away_value, 
-      betting.spread_away_odds, 
-      betting.moneyline_home_odds, 
-      betting.moneyline_away_odds, 
-      betting.total_value, 
-      betting.total_over_odds, 
-      betting.total_under_odds
+      betting.spread_home_value,
+      betting.spread_home_odds,
+      betting.spread_away_value,
+      betting.spread_away_odds,
+      betting.moneyline_home_odds,
+      betting.moneyline_away_odds,
+      betting.total_value,
+      betting.total_over_odds,
+      betting.total_under_odds,
     ];
 
-    await gpdb.query(query, values);
+    await this.pool.query(query, values);
   }
 
   async getBettingByID(bettingId: number) {
     const existing = await this.getBettingByID(bettingId);
     if (existing) {
       return existing;
-    } 
-    const response = await this.api.nba.getBettingOdds(bettingId);
+    }
+    const response = await this.api.nba.getOdds({
+      date: undefined,
+      game_id: bettingId,
+    });
     const betting = response.data[0];
 
     if (!betting) {
@@ -69,10 +72,4 @@ export class BettingService {
 
     return await this.getBettingByID(bettingId);
   }
-
-  
-  
 }
- 
-
-

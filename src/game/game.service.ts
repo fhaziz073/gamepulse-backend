@@ -1,18 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { Inject, Injectable } from '@nestjs/common';
 import { BalldontlieAPI } from '@balldontlie/sdk';
-import { gpdb } from './gamepulse_database';
-
-
+import { Pool } from 'pg';
+import { PG_CONNECTION } from 'src/database/database.module';
 @Injectable()
 export class GameService {
+  constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
   private apiKey = process.env.SPORTS_API_KEY as string;
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
-  
   async getGameFromDB(gameId: number) {
-    const result = await gpdb.query(
+    const result = await this.pool.query(
       `SELECT * FROM "Game Table" WHERE id = $1`,
-      [gameId]
+      [gameId],
     );
     return result.rows[0];
   }
@@ -36,35 +34,35 @@ export class GameService {
       game.status,
       game.home_team_id,
       game.visitor_team_id,
-      game.season, 
-      game.home_q1, 
-      game.home_q2, 
-      game.home_q3, 
-      game.home_q4, 
-      game.home_ot1, 
-      game.home_ot2, 
-      game.home_ot3, 
-      game.visitor_q1, 
-      game.visitor_q2, 
-      game.visitor_q3, 
-      game.visitor_q4, 
-      game.visitor_ot1, 
-      game.visitor_ot2, 
-      game.visitor_ot3, 
+      game.season,
+      game.home_q1,
+      game.home_q2,
+      game.home_q3,
+      game.home_q4,
+      game.home_ot1,
+      game.home_ot2,
+      game.home_ot3,
+      game.visitor_q1,
+      game.visitor_q2,
+      game.visitor_q3,
+      game.visitor_q4,
+      game.visitor_ot1,
+      game.visitor_ot2,
+      game.visitor_ot3,
       game.home_team_score,
-      game.visitor_team_score, 
-      game.postseason, 
-      game.postponed
+      game.visitor_team_score,
+      game.postseason,
+      game.postponed,
     ];
 
-    await gpdb.query(query, values);
+    await this.pool.query(query, values);
   }
 
   async getGameByID(gameId: number) {
     const existing = await this.getGameFromDB(gameId);
     if (existing) {
       return existing;
-    } 
+    }
     const response = await this.api.nba.getGame(gameId);
     const game = response.data[0];
 
@@ -77,18 +75,17 @@ export class GameService {
     return await this.getGameFromDB(gameId);
   }
 
-
   async getHomeTeam(gameId: number) {
     const game = await this.getGameByID(gameId);
     return game?.home_team_id;
   }
 
-  async getAwayTeam(gameId: number){
+  async getAwayTeam(gameId: number) {
     const game = await this.getGameByID(gameId);
     return game?.visitor_team_id;
   }
 
-  async getHomeScore(gameId: number){
+  async getHomeScore(gameId: number) {
     const game = await this.getGameByID(gameId);
     return game?.home_team_score;
   }
@@ -98,11 +95,8 @@ export class GameService {
     return game?.visitor_team_id;
   }
 
-  async getStatus(gameId: number){
+  async getStatus(gameId: number) {
     const game = await this.getGameByID(gameId);
     return game?.status;
   }
 }
-
-
-
