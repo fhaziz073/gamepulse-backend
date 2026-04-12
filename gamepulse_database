@@ -1,37 +1,45 @@
-CREATE TABLE public."User Table" (
-    "User ID" uuid NOT NULL,
-    "Avatar URL" text,
-    "Creation Time" timestamp with time zone,
-    "Password" character varying,
-    "Notification Token" character varying,
-    "Username" text,
-    "Email" text
-);
+--
+-- PostgreSQL database dump
+--
 
-CREATE TABLE public."Preference Table" (
-    "User ID" uuid,
-    "Games Starting Notif Pref" boolean,
-    "Ongoing Close Games Notif Pref" boolean,
-    "Favorite Teams" json,
-    "Favorite Players" json
-);
+-- Dumped from database version 16.6
+-- Dumped by pg_dump version 16.6
 
-CREATE TABLE public."Team Table" (
+-- Started on 2026-04-07 18:41:17
+
+--
+-- TOC entry 220 (class 1259 OID 24617)
+-- Name: Betting Table; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Betting Table" (
     id integer,
-    name text,
-    full_name text,
-    abbreviation text,
-    city text,
-    conference text,
-    division text,
-    hex_code text
+    game_id integer,
+    vendor text,
+    spread_home_value text,
+    spread_home_odds integer,
+    spread_away_value text,
+    spread_away_odds integer,
+    moneyline_home_odds integer,
+    moneyline_away_odds integer,
+    total_value text,
+    total_over_odds integer,
+    total_under_odds integer
 );
+
+
+ALTER TABLE public."Betting Table" OWNER TO postgres;
+
+--
+-- TOC entry 217 (class 1259 OID 24602)
+-- Name: Game Table; Type: TABLE; Schema: public; Owner: postgres
+--
 
 CREATE TABLE public."Game Table" (
     id integer,
     date text,
-    "Home Team ID" integer,
-    "Away Team ID" integer,
+    home_team_id integer,
+    visitor_team_id integer,
     season integer,
     home_q1 integer,
     home_q2 integer,
@@ -53,6 +61,14 @@ CREATE TABLE public."Game Table" (
     postponed boolean
 );
 
+
+ALTER TABLE public."Game Table" OWNER TO postgres;
+
+--
+-- TOC entry 219 (class 1259 OID 24612)
+-- Name: Player Table; Type: TABLE; Schema: public; Owner: postgres
+--
+
 CREATE TABLE public."Player Table" (
     id integer,
     first_name text,
@@ -68,26 +84,144 @@ CREATE TABLE public."Player Table" (
     draft_number integer
 );
 
-CREATE TABLE public."Betting Table" (
-    id integer,
-    game_id integer,
-    vendor text,
-    spread_home_value text,
-    spread_home_odds integer,
-    spread_away_value text,
-    spread_away_odds integer,
-    moneyline_home_odds integer,
-    moneyline_away_odds integer,
-    total_value text,
-    total_over_odds integer,
-    total_under_odds integer
+
+ALTER TABLE public."Player Table" OWNER TO postgres;
+
+--
+-- TOC entry 216 (class 1259 OID 24597)
+-- Name: Preference Table; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Preference Table" (
+    "User ID" uuid NOT NULL,
+    "Games Starting Notif Pref" boolean,
+    "Ongoing Close Games Notif Pref" boolean,
+    "Favorite Teams" uuid[],
+    "Favorite Players" uuid[]
 );
+
+
+ALTER TABLE public."Preference Table" OWNER TO postgres;
+
+--
+-- TOC entry 218 (class 1259 OID 24607)
+-- Name: Team Table; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Team Table" (
+    id integer,
+    name text,
+    full_name text,
+    abbreviation text,
+    city text,
+    conference text,
+    division text,
+    hex_code text
+);
+
+
+ALTER TABLE public."Team Table" OWNER TO postgres;
+
+--
+-- TOC entry 215 (class 1259 OID 24592)
+-- Name: User Table; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."User Table" (
+    "User ID" uuid NOT NULL,
+    "Avatar URL" text,
+    "Creation Time" timestamp with time zone,
+    "Password" character varying,
+    "Notification Token" character varying,
+    "Username" text,
+    "Email" text
+);
+
+
+ALTER TABLE public."User Table" OWNER TO postgres;
+
+--
+-- TOC entry 4809 (class 0 OID 24617)
+-- Dependencies: 220
+-- Data for Name: Betting Table; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 4806 (class 0 OID 24602)
+-- Dependencies: 217
+-- Data for Name: Game Table; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+--
+-- TOC entry 4808 (class 0 OID 24612)
+-- Dependencies: 219
+-- Data for Name: Player Table; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 4805 (class 0 OID 24597)
+-- Dependencies: 216
+-- Data for Name: Preference Table; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+--
+-- TOC entry 4807 (class 0 OID 24607)
+-- Dependencies: 218
+-- Data for Name: Team Table; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+--
+-- TOC entry 4804 (class 0 OID 24592)
+-- Dependencies: 215
+-- Data for Name: User Table; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+--
+-- TOC entry 4660 (class 2606 OID 24631)
+-- Name: Preference Table Preference Table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Preference Table"
+    ADD CONSTRAINT "Preference Table_pkey" PRIMARY KEY ("User ID");
+
+
+--
+-- TOC entry 4654 (class 2606 OID 24629)
+-- Name: User Table Unique Email; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
 
 ALTER TABLE ONLY public."User Table"
     ADD CONSTRAINT "Unique Email" UNIQUE ("Email");
 
+
+--
+-- TOC entry 4656 (class 2606 OID 24627)
+-- Name: User Table Unique Username; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
 ALTER TABLE ONLY public."User Table"
     ADD CONSTRAINT "Unique Username" UNIQUE ("Username");
 
+
+--
+-- TOC entry 4658 (class 2606 OID 24625)
+-- Name: User Table User Table_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
 ALTER TABLE ONLY public."User Table"
     ADD CONSTRAINT "User Table_pkey" PRIMARY KEY ("User ID");
+
+
+-- Completed on 2026-04-07 18:41:17
+
+--
+-- PostgreSQL database dump complete
+--
+
