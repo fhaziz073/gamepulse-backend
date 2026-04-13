@@ -53,7 +53,7 @@ export class PlayerService {
     if (existing) {
       return existing;
     } 
-    const response = await this.api.nba.getPlayers(playerId);
+    const response = await this.api.nba.getPlayers();
     const player = response.data[0];
 
     if (!player) {
@@ -65,10 +65,10 @@ export class PlayerService {
     return await this.getPlayerFromDB(playerId);
   }
 
-  async getPlayerByName(playerName: string): Promise<string> {
-    const response = await this.api.nba.getPlayers({ players: playerName });
+  async getPlayerByName(playerName: string): Promise<any[]> {
+    const response = await this.api.nba.getPlayers({ search: playerName });
 
-    const players = response.data;
+    const players = response.data ?? [];
 
     await Promise.all(players.map((p) => this.upsertPlayer(p)));
 
@@ -76,8 +76,12 @@ export class PlayerService {
   }
 
   async getSeason(playerId: number) {
-    const player = await BalldontlieAPI.nba.getAdvancedStats({ seasons: `${new Date().getFullYear()}` });
-    return player?.seasons;
+    const currentYear = new Date().getFullYear();
+    const response = await this.api.nba.getAdvancedStats({
+      player_ids: [playerId],
+      seasons: [currentYear]
+    });
+    return response.data ?? [];
   }
 
   async getHeight(playerId: number) {

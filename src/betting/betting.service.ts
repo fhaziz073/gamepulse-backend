@@ -53,12 +53,12 @@ export class BettingService {
     await gpdb.query(query, values);
   }
 
-  async getBettingByID(bettingId: number) {
-    const existing = await this.getBettingByID(bettingId);
+  async getBettingByID(bettingId: number, gameId: number) {
+    const existing = await this.getBettingByID(bettingId, gameId);
     if (existing) {
       return existing;
     } 
-    const response = await this.api.nba.getBettingOdds(bettingId);
+    const response = await this.api.nba.getOdds({game_id: gameId});
     const betting = response.data[0];
 
     if (!betting) {
@@ -67,7 +67,7 @@ export class BettingService {
 
     await this.upsertBetting(betting);
 
-    return await this.getBettingByID(bettingId);
+    return await this.getBettingByID(bettingId, gameId);
   }
 
   

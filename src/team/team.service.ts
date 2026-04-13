@@ -39,11 +39,11 @@ export class TeamService {
   }
 
   async getTeamById(teamId: number) {
-        const existing = await this.getTeamFromDB(teamId);
+    const existing = await this.getTeamFromDB(teamId);
     if (existing) {
       return existing;
     } 
-    const response = await this.api.nba.getTeam({ id: teamId });
+    const response = await this.api.nba.getTeams();
     const game = response.data[0];
 
     if (!game) {
@@ -55,9 +55,17 @@ export class TeamService {
     return await this.getTeamFromDB(teamId);
   }
 
-  async getPlayers(id: number) {
-    const players = await  fetch ("https://api.balldontlie.io/v1/players?team_ids[]=$1", id);
-    return players;
+    async getPlayers(teamId: number) {
+      const response = await fetch(
+        `https://api.balldontlie.io/v1/players?team_ids[]=${teamId}`,
+        {
+          headers: {
+            Authorization: process.env.SPORTS_API_KEY as string
+          }
+        }
+      );
+      const data = await response.json();
+      return data.data ?? [];
   }
 
 }

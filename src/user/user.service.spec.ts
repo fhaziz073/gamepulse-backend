@@ -12,9 +12,20 @@ describe('UserService', () => {
     service = module.get<UserService>(UserService);
   });
 
-  it('should create a user', () => {
-    const user = service.createUser('john', 'john@test.com', 'avatar.png');
+  it('should create a user', async () => {
+    await service.upsertUser({
+      Username: 'john',
+      Email: 'john@test.com',
+      'Avatar URL': 'avatar.png',
+      'User ID': randomUUID(),
+      'Creation Time': new Date(),
+      Password: 'password1',
+      'Notification Token': 'token1',
+    });
+    const user = await service.logIn('john', '');
     expect(user).toBeDefined();
-    expect(user.username).toBe('john');
+    expect(user?.Username).toBe('john');
   });
+
+
 });

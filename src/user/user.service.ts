@@ -43,7 +43,7 @@ export class UserService {
     if (existing) {
       return existing;
     } 
-    const user;
+    const user = existing;
 
     await this.upsertUser(user);
 
