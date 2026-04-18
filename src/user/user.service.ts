@@ -53,10 +53,10 @@ export class UserService {
     }
   }
 
-  async setUsername(id: UUID, newUsername: string): Promise<void> {
+  async setUsername(id: string, newUsername: string): Promise<void> {
     const query = `
       UPDATE "User Table"
-      SET Username = $1
+      SET "Username" = $1
       WHERE "User ID" = $2
     `;
 
@@ -71,8 +71,8 @@ export class UserService {
   async setPassword(id: string, newPassword: string): Promise<void> {
     const query = `
       UPDATE "User Table"
-      SET Password = $1
-      WHERE Username = $2
+      SET "Password" = $1
+      WHERE "User ID" = $2
     `;
 
     const values = [newPassword, id];
@@ -87,8 +87,8 @@ export class UserService {
   async setEmail(id: string, newEmail: string): Promise<void> {
     const query = `
       UPDATE "User Table"
-      SET Email = $1
-      WHERE Username = $2
+      SET "Email" = $1
+      WHERE "User ID" = $2
     `;
 
     const values = [newEmail, id];
@@ -103,8 +103,8 @@ export class UserService {
   async setAvatarUrl(id: string, newUrl: string): Promise<void> {
     const query = `
       UPDATE "User Table"
-      SET Avatar URL = $1
-      WHERE Username = $2
+      SET "Avatar URL" = $1
+      WHERE "User ID" = $2
     `;
 
     const values = [newUrl, id];
@@ -135,11 +135,11 @@ export class UserService {
   }
 
   async upsertPreferenceTable(
-    userId: number,
+    userId: UUID,
     gameStartNotifPref: boolean,
     ongoingGameNotifPref: boolean,
-    favTeams: object,
-    favPlayers: object,
+    favTeams: UUID[],
+    favPlayers: UUID[],
   ) {
     const query = `
       INSERT INTO "Preference Table"
@@ -150,8 +150,8 @@ export class UserService {
       userId,
       gameStartNotifPref,
       ongoingGameNotifPref,
-      JSON.stringify(favTeams),
-      JSON.stringify(favPlayers),
+      favTeams,
+      favPlayers,
     ];
 
     try {
@@ -162,10 +162,10 @@ export class UserService {
     }
   }
 
-  async changeGS(userId: number, newBool: boolean) {
+  async changeGS(userId: UUID, newBool: boolean) {
     const query = ` UPDATE "Preference Table"
        SET "Games Starting Notif Pref" = $1
-       WHERE id = $2
+       WHERE "User ID" = $2
     `;
     const values = [newBool, userId];
 
@@ -176,10 +176,10 @@ export class UserService {
     }
   }
 
-  async changeOGC(userId: number, newBool: boolean) {
+  async changeOGC(userId: UUID, newBool: boolean) {
     const query = ` UPDATE "Preference Table"
        SET "Ongoing Close Games Notif Pref" = $1
-       WHERE id = $2
+       WHERE "User ID" = $2
     `;
     const values = [newBool, userId];
 
@@ -190,40 +190,17 @@ export class UserService {
     }
   }
 
-  async addFavoriteTeam(userId: number, team: string): Promise<void> {
+  async updateFavoriteTeams(userId: UUID, teams: UUID[]): Promise<void> {
     const query = `
     UPDATE "Preference Table"
-    SET "Favorite Teams" = 
-      COALESCE("Favorite Teams", '[]'::jsonb) || to_jsonb($1::text)
+    SET "Favorite Teams" = $1
     WHERE "User ID" = $2
   `;
-
-    const values = [team, userId];
-
+    const values = [teams, userId];
     try {
       await this.pool.query(query, values);
     } catch {
-      console.log('Failed Favorite Team Insert Operation');
-    }
-  }
-
-  async removeFavoriteTeam(userId: number, team: string): Promise<void> {
-    const query = `
-    UPDATE "Preference Table"
-    SET "Favorite Teams" = (
-      SELECT jsonb_agg(value)
-      FROM jsonb_array_elements("Favorite Teams"::jsonb) AS value
-      WHERE value != to_jsonb($1::text)
-    )
-    WHERE "User ID" = $2
-  `;
-
-    const values = [team, userId];
-
-    try {
-      await this.pool.query(query, values);
-    } catch {
-      console.log('Failed Favorite Team Deletion Operation');
+      console.log('Failed Favorite Team Update Operation');
     }
   }
   async getUsers() {
