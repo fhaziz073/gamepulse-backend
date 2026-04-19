@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TeamController } from './team.controller';
 import { TeamService } from './team.service';
- 
+
 describe('TeamController', () => {
   let teamController: TeamController;
   let teamService: TeamService;
@@ -15,6 +15,4 @@ describe('TeamController', () => {
     teamController = module.get<TeamController>(TeamController);
     teamService = module.get<TeamService>(TeamService);
   });
-
 });
- 
