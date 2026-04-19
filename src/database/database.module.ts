@@ -9,7 +9,7 @@ const dbProvider = {
   useFactory: () => {
     // Render provides a DATABASE_URL. If it exists, use it.
     // If not, use your local fallback settings.
-    const connectionString = null;
+    const connectionString = process.env.DATABASE_URL;
 
     if (connectionString) {
       return new Pool({
