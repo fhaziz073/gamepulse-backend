@@ -139,7 +139,8 @@ ALTER TABLE ONLY public."User Table"
     ADD CONSTRAINT "User Table_pkey" PRIMARY KEY ("User ID");
 ALTER TABLE ONLY public."Game Table"
     ADD CONSTRAINT "Game Table_pkey" PRIMARY KEY ("id");
-
+ALTER TABLE ONLY public."Player Table"
+    ADD CONSTRAINT "Player Table_pkey" PRIMARY KEY ("id");
 
 -- Completed on 2026-04-07 18:41:17
 

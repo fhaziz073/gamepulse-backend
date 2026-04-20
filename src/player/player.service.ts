@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { BalldontlieAPI, NBAPlayer } from '@balldontlie/sdk';
 import { PG_CONNECTION } from 'src/database/database.module';
 import { Pool } from 'pg';
@@ -11,14 +10,19 @@ export class PlayerService {
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
 
   async getPlayerFromDB(playerId: number) {
-    const result = await this.pool.query(
-      `SELECT * FROM "Player Table" WHERE id = $1`,
-      [playerId],
-    );
-    return result.rows[0];
+    try {
+      const result = await this.pool.query(
+        `SELECT * FROM "Player Table" WHERE id = $1`,
+        [playerId],
+      );
+      return result.rows[0] as NBAPlayer;
+    } catch {
+      console.log("Can't connect to database");
+    }
+    return null;
   }
 
-  async upsertPlayer(player: any) {
+  async upsertPlayer(player: NBAPlayer) {
     const query = `
       INSERT INTO "Player Table"
       (id, first_name, last_name, position, height, weight, jersey_number, college, country, draft_year, draft_round, draft_number)
@@ -55,7 +59,7 @@ export class PlayerService {
       return existing;
     }
     const response = await this.api.nba.getPlayer(playerId);
-    const player = response.data[0];
+    const player = response.data;
 
     if (!player) {
       return null;
@@ -77,22 +81,10 @@ export class PlayerService {
   }
 
   async getSeason(playerId: number) {
-    // const player = await BalldontlieAPI.nba.getAdvancedStats({
-    //   seasons: `${new Date().getFullYear()}`,
-    // });
     const player = await this.api.nba.getAdvancedStats({
-      seasons: [new Date().getFullYear()],
+      seasons: [new Date().getFullYear() - 1],
+      player_ids: [playerId],
     });
     return player.data;
-  }
-
-  async getHeight(playerId: number) {
-    const player = await this.getPlayerById(playerId);
-    return player?.height;
-  }
-
-  async getWeight(playerId: number) {
-    const player = await this.getPlayerById(playerId);
-    return player?.weight;
   }
 }

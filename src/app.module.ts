@@ -14,6 +14,8 @@ import { TeamController } from './team/team.controller';
 import { TeamService } from './team/team.service';
 import { GameController } from './game/game.controller';
 import { GameService } from './game/game.service';
+import { PlayerController } from './player/player.controller';
+import { PlayerService } from './player/player.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule, ScheduleModule.forRoot()],
@@ -23,6 +25,7 @@ import { GameService } from './game/game.service';
     UserController,
     TeamController,
     GameController,
+    PlayerController,
   ],
   providers: [
     AppService,
@@ -32,6 +35,7 @@ import { GameService } from './game/game.service';
     TasksService,
     TeamService,
     GameService,
+    PlayerService,
   ],
 })
 export class AppModule {}
