@@ -57,7 +57,7 @@ export class TeamService {
 
     await this.pool.query(query, values);
   }
-
+  //Need to manually add hex code to data
   async getTeamById(teamId: number) {
     const existing = await this.getTeamFromDB(teamId);
     if (existing) {

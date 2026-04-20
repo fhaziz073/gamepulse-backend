@@ -12,6 +12,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService } from './tasks/tasks.service';
 import { TeamController } from './team/team.controller';
 import { TeamService } from './team/team.service';
+import { GameController } from './game/game.controller';
+import { GameService } from './game/game.service';
 
 @Module({
   imports: [DatabaseModule, AuthModule, ScheduleModule.forRoot()],
@@ -20,6 +22,7 @@ import { TeamService } from './team/team.service';
     CalendarController,
     UserController,
     TeamController,
+    GameController,
   ],
   providers: [
     AppService,
@@ -28,6 +31,7 @@ import { TeamService } from './team/team.service';
     MigrationService,
     TasksService,
     TeamService,
+    GameService,
   ],
 })
 export class AppModule {}
