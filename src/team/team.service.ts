@@ -1,61 +1,29 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BalldontlieAPI } from '@balldontlie/sdk';
-import { PG_CONNECTION } from 'src/database/database.module';
-import { Pool } from 'pg';
-export type Team = {
-  hex_code: string;
-  id: number;
-  conference: 'East' | 'West';
-  division:
-    | 'Atlantic'
-    | 'Central'
-    | 'Southeast'
-    | 'Northwest'
-    | 'Pacific'
-    | 'Southwest';
-  city: string;
-  name: string;
-  full_name: string;
-  abbreviation: string;
-};
+import { InjectRepository } from '@nestjs/typeorm';
+import { Team } from 'src/entity/team.entity';
+import { Repository } from 'typeorm';
+
 @Injectable()
 export class TeamService {
-  constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
+  constructor(
+    @InjectRepository(Team) private teamsRepository: Repository<Team>,
+  ) {}
   private apiKey = process.env.SPORTS_API_KEY as string;
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
 
   async getTeamFromDB(teamId: number) {
     try {
-      const result = await this.pool.query(
-        `SELECT * FROM "Team Table" WHERE id = $1`,
-        [teamId],
-      );
-      return result.rows[0] as Team;
+      const result = await this.teamsRepository.findOneBy({ id: teamId });
+      return result;
     } catch {
       console.log("Can't connect to database");
     }
     return null;
   }
 
-  async upsertTeam(team: Team) {
-    const query = `
-      INSERT INTO "Team Table"
-      (id, name, full_name, abbreviation, city, conference, division, hex_code)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-      `;
-
-    const values = [
-      team.id,
-      team.name,
-      team.full_name,
-      team.abbreviation,
-      team.city,
-      team.conference,
-      team.division,
-      team.hex_code,
-    ];
-
-    await this.pool.query(query, values);
+  async createTeam(team: Team) {
+    await this.teamsRepository.save(team);
   }
   //Need to manually add hex code to data
   async getTeamById(teamId: number) {
@@ -69,7 +37,7 @@ export class TeamService {
     if (!team) {
       return null;
     }
-    await this.upsertTeam({ ...team, hex_code: '' });
+    await this.createTeam({ ...team, hex_code: '' });
 
     return await this.getTeamFromDB(teamId);
   }

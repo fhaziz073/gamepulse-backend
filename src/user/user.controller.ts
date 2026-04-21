@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
 import { UserService } from './user.service';
-import { randomUUID, UUID } from 'node:crypto';
+import { UUID } from 'node:crypto';
 
 @Controller('users')
 export class UserController {
@@ -17,34 +17,13 @@ export class UserController {
       notif_token: string;
     },
   ) {
-    await this.userService.upsertUser({
-      Username: body.username,
-      Email: body.email,
-      'Avatar URL': body.avatarUrl,
-      'User ID': randomUUID(),
-      'Creation Time': new Date(),
-      Password: body.password,
-      'Notification Token': body.notif_token,
+    await this.userService.createUser({
+      username: body.username,
+      email: body.email,
+      avatarUrl: body.avatarUrl,
+      password: body.password,
+      notificationToken: body.notif_token,
     });
-  }
-  @Post('pref')
-  async createUserPreferences(
-    @Body()
-    body: {
-      userId: UUID;
-      gameStartNotifPref: boolean;
-      ongoingGameNotifPref: boolean;
-      favTeams: UUID[];
-      favPlayers: UUID[];
-    },
-  ) {
-    await this.userService.upsertPreferenceTable(
-      body.userId,
-      body.gameStartNotifPref,
-      body.ongoingGameNotifPref,
-      body.favTeams,
-      body.favPlayers,
-    );
   }
   @Get()
   async getAllUsers() {

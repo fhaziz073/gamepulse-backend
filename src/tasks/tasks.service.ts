@@ -1,14 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { Pool } from 'pg';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CalendarService } from 'src/calendar/calendar.service';
-import { PG_CONNECTION } from 'src/database/database.module';
+import { User } from 'src/entity/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TasksService {
   constructor(
     private calendarService: CalendarService,
-    @Inject(PG_CONNECTION) private pool: Pool,
+    @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
   @Cron('0 */15 * * * *')
   async sendNotification() {
@@ -20,19 +21,22 @@ export class TasksService {
     const diffInMs = nextGameStart.getTime() - now.getTime();
     const diffInHrs = diffInMs / (1000 * 60 * 60);
     console.log(diffInHrs);
-    const query = 'SELECT "Notification Token" FROM "User Table"';
-    const result = await this.pool.query(query);
-    console.log(result.rows);
+    const result = await this.usersRepository
+      .createQueryBuilder('user')
+      .select(['user.notificationToken'])
+      .getMany();
+    console.log(result);
     if (diffInHrs < 1 && diffInHrs > 0) {
-      console.log('Sending Notification');
-      const query = 'SELECT "Notification Token" FROM "User Table"';
-      const result = await this.pool.query(query);
-      console.log(result.rows);
+      const result = await this.usersRepository
+        .createQueryBuilder('user')
+        .select(['user.notificationToken'])
+        .getMany();
+      console.log(result);
       const diffInMins = Math.round(diffInMs / (1000 * 60));
-      for (const row of result.rows) {
-        console.log(row['Notification Token']);
+      for (const row of result) {
+        console.log(row.notificationToken);
         await this.sendPushNotification(
-          row['Notification Token'],
+          row.notificationToken,
           diffInMins.toString(),
           games[0].title,
         );

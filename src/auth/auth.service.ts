@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { User, UserService } from 'src/user/user.service';
+import { User } from 'src/entity/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -8,10 +9,10 @@ export class AuthService {
   async validateUser(
     username: string,
     pass: string,
-  ): Promise<Omit<User, 'Password'> | null> {
+  ): Promise<Omit<User, 'password'> | null> {
     const user = await this.usersService.getUserFromDB(username);
-    if (user && user.Password === pass) {
-      const { Password, ...result } = user;
+    if (user && user.password === pass) {
+      const { password, ...result } = user;
       return result;
     }
     return null;

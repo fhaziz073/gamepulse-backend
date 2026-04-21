@@ -17,4 +17,4 @@ describe('CalendarController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
-}); 
+});

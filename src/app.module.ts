@@ -1,41 +1,51 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CalendarController } from './calendar/calendar.controller';
-import { CalendarService } from './calendar/calendar.service';
-import { UserService } from './user/user.service';
-import { UserController } from './user/user.controller';
-import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
-import { MigrationService } from './migration/migration.service';
 import { ScheduleModule } from '@nestjs/schedule';
-import { TasksService } from './tasks/tasks.service';
-import { TeamController } from './team/team.controller';
-import { TeamService } from './team/team.service';
-import { GameController } from './game/game.controller';
-import { GameService } from './game/game.service';
-import { PlayerController } from './player/player.controller';
-import { PlayerService } from './player/player.service';
-
+import { TypeOrmModule } from '@nestjs/typeorm';
+import 'dotenv/config';
+import { DataSource } from 'typeorm';
+import { User } from './entity/user.entity';
+import { Preference } from './entity/preference.entity';
+import { Team } from './entity/team.entity';
+import { Game } from './entity/game.entity';
+import { CalendarModule } from './calendar/calendar.module';
+import { TasksModule } from './tasks/tasks.module';
+import { Player } from './entity/player.entity';
+import { Betting } from './entity/betting.entity';
+import { UsersModule } from './user/user.module';
+import { PlayerModule } from './player/player.module';
+import { GameModule } from './game/game.module';
+import { SearchModule } from './search/search.module';
+import { TeamModule } from './team/team.module';
 @Module({
-  imports: [DatabaseModule, AuthModule, ScheduleModule.forRoot()],
-  controllers: [
-    AppController,
-    CalendarController,
-    UserController,
-    TeamController,
-    GameController,
-    PlayerController,
+  imports: [
+    AuthModule,
+    ScheduleModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: process.env.POSTGRES_PASSWORD,
+      database: 'gamepulse',
+      entities: [User, Preference, Team, Game, Player, Betting],
+      synchronize: true,
+    }),
+    CalendarModule,
+    TasksModule,
+    UsersModule,
+    PlayerModule,
+    GameModule,
+    SearchModule,
+    TeamModule,
   ],
-  providers: [
-    AppService,
-    CalendarService,
-    UserService,
-    MigrationService,
-    TasksService,
-    TeamService,
-    GameService,
-    PlayerService,
-  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+}

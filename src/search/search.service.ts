@@ -1,40 +1,41 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Pool } from 'pg';
-import { PG_CONNECTION } from 'src/database/database.module';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Game } from 'src/entity/game.entity';
+import { Player } from 'src/entity/player.entity';
+import { Team } from 'src/entity/team.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SearchService {
-  constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
+  constructor(
+    @InjectRepository(Team) private teamsRepository: Repository<Team>,
+    @InjectRepository(Game) private gamesRepository: Repository<Game>,
+    @InjectRepository(Player) private playersRepository: Repository<Player>,
+  ) {}
   async searchGame(searchTerm: string) {
-    const query = `
-      SELECT *
-      FROM "Game Table"
-      WHERE LOWER("Game Name") LIKE LOWER($1)
-    `;
-    const values = [`%${searchTerm}%`];
-    const result = await this.pool.query(query, values);
-    return result.rows;
+    return this.gamesRepository
+      .createQueryBuilder('game')
+      .where('LOWER(game.id) LIKE LOWER(:searchTerm)', {
+        searchTerm: `%${searchTerm}%`,
+      })
+      .getMany();
   }
 
   async searchTeams(searchTerm: string) {
-    const query = `
-      SELECT *
-      FROM "Team Table"
-      WHERE LOWER("Team Name") LIKE LOWER($1)
-    `;
-    const values = [`%${searchTerm}%`];
-    const result = await this.pool.query(query, values);
-    return result.rows;
+    return this.teamsRepository
+      .createQueryBuilder('team')
+      .where('LOWER(team.full_name) LIKE LOWER(:searchTerm)', {
+        searchTerm: `%${searchTerm}%`,
+      })
+      .getMany();
   }
 
   async searchPlayer(searchTerm: string) {
-    const query = `
-      SELECT *
-      FROM "Player Table"
-      WHERE LOWER("Player Name") LIKE LOWER($1)
-    `;
-    const values = [`%${searchTerm}%`];
-    const result = await this.pool.query(query, values);
-    return result.rows;
+    return this.playersRepository
+      .createQueryBuilder('player')
+      .where('LOWER(player.first_name) LIKE LOWER(:searchTerm)', {
+        searchTerm: `%${searchTerm}%`,
+      })
+      .getMany();
   }
 }

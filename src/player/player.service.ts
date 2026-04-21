@@ -1,58 +1,30 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BalldontlieAPI, NBAPlayer } from '@balldontlie/sdk';
-import { PG_CONNECTION } from 'src/database/database.module';
-import { Pool } from 'pg';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Player } from 'src/entity/player.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PlayerService {
-  constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
+  constructor(
+    @InjectRepository(Player) private playersRepository: Repository<Player>,
+  ) {}
   private apiKey = process.env.SPORTS_API_KEY as string;
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
 
   async getPlayerFromDB(playerId: number) {
     try {
-      const result = await this.pool.query(
-        `SELECT * FROM "Player Table" WHERE id = $1`,
-        [playerId],
-      );
-      return result.rows[0] as NBAPlayer;
+      const result = await this.playersRepository.findOneBy({ id: playerId });
+      return result;
     } catch {
       console.log("Can't connect to database");
     }
     return null;
   }
 
-  async upsertPlayer(player: NBAPlayer) {
-    const query = `
-      INSERT INTO "Player Table"
-      (id, first_name, last_name, position, height, weight, jersey_number, college, country, draft_year, draft_round, draft_number)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-      ON CONFLICT (id) DO UPDATE SET
-        first_name = EXCLUDED.first_name,
-        last_name = EXCLUDED.last_name,
-        position = EXCLUDED.position,
-        height = EXCLUDED.height,
-        weight = EXCLUDED.weight
-    `;
-
-    const values = [
-      player.id,
-      player.first_name,
-      player.last_name,
-      player.position,
-      player.height,
-      player.weight,
-      player.jersey_number,
-      player.college,
-      player.country,
-      player.draft_year,
-      player.draft_round,
-      player.draft_number,
-    ];
-
-    await this.pool.query(query, values);
+  async createPlayer(player: Player) {
+    await this.playersRepository.save(player);
   }
-
   async getPlayerById(playerId: number) {
     const existing = await this.getPlayerFromDB(playerId);
     if (existing) {
@@ -65,7 +37,7 @@ export class PlayerService {
       return null;
     }
 
-    await this.upsertPlayer(player);
+    await this.createPlayer(player);
 
     return await this.getPlayerFromDB(playerId);
   }
@@ -75,7 +47,7 @@ export class PlayerService {
 
     const players = response.data;
 
-    await Promise.all(players.map((p) => this.upsertPlayer(p)));
+    await Promise.all(players.map((p) => this.createPlayer(p)));
 
     return players;
   }

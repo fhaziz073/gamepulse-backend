@@ -1,161 +1,101 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { UUID } from 'node:crypto';
-import { Pool } from 'pg';
-import { PG_CONNECTION } from 'src/database/database.module';
-export type User = {
-  'User ID': string;
-  Username: string;
-  Email: string;
-  'Avatar URL': string;
-  'Creation Time': Date;
-  Password: string;
-  'Notification Token': string;
-};
+import { Preference } from 'src/entity/preference.entity';
+import { User } from 'src/entity/user.entity';
+import { Repository } from 'typeorm';
+
 @Injectable()
 export class UserService {
-  constructor(@Inject(PG_CONNECTION) private pool: Pool) {}
+  constructor(
+    @InjectRepository(User) private usersRepository: Repository<User>,
+    @InjectRepository(Preference)
+    private preferenceRepository: Repository<Preference>,
+  ) {}
   async getUserFromDB(userId: string): Promise<User | null> {
     try {
-      const result = await this.pool.query(
-        `SELECT * FROM "User Table" WHERE "Username" = $1`,
-        [userId],
-      );
-      return result.rows[0] as User;
+      const result = await this.usersRepository.findOneBy({ username: userId });
+      return result;
     } catch {
       console.log("Can't connect to database");
     }
     return null;
   }
-
-  async upsertUser(user: User) {
-    const query = `
-  INSERT INTO "User Table" 
-    ("User ID", "Username", "Email", "Avatar URL", "Creation Time", "Password", "Notification Token")
-  VALUES 
-    ($1, $2, $3, $4, $5, $6, $7)
-  ON CONFLICT ("Username") DO UPDATE SET
-    "Email" = EXCLUDED."Email",
-    "Avatar URL" = EXCLUDED."Avatar URL";
-`;
-    const values = [
-      user['User ID'],
-      user.Username,
-      user.Email,
-      user['Avatar URL'],
-      user['Creation Time'],
-      user.Password,
-      user['Notification Token'],
-    ];
-    try {
-      await this.pool.query(query, values);
-    } catch (error) {
-      console.error('Failed Upsert Operation:', error);
-    }
+  async createUser(userInfo: {
+    username: string;
+    email: string;
+    avatarUrl: string;
+    password: string;
+    notificationToken: string;
+  }) {
+    const preference = await this.preferenceRepository.save({
+      gameStartNotifPref: false,
+      ongoingGameNotifPref: false,
+      favTeams: [],
+      favPlayers: [],
+    });
+    await this.usersRepository.save({
+      username: userInfo.username,
+      email: userInfo.email,
+      avatarUrl: userInfo.avatarUrl,
+      creationTime: new Date(),
+      password: userInfo.password,
+      notificationToken: userInfo.notificationToken,
+      preference,
+    });
   }
 
   async setUsername(id: string, newUsername: string): Promise<void> {
-    const query = `
-      UPDATE "User Table"
-      SET "Username" = $1
-      WHERE "User ID" = $2
-    `;
-
-    const values = [newUsername, id];
     try {
-      await this.pool.query(query, values);
+      await this.usersRepository.update({ id }, { username: newUsername });
     } catch {
       console.log('Failed Username Update Operation');
     }
   }
 
   async setPassword(id: string, newPassword: string): Promise<void> {
-    const query = `
-      UPDATE "User Table"
-      SET "Password" = $1
-      WHERE "User ID" = $2
-    `;
-
-    const values = [newPassword, id];
-
     try {
-      await this.pool.query(query, values);
+      await this.usersRepository.update({ id }, { password: newPassword });
     } catch {
       console.log('Failed Username Password Operation');
     }
   }
 
   async setEmail(id: string, newEmail: string): Promise<void> {
-    const query = `
-      UPDATE "User Table"
-      SET "Email" = $1
-      WHERE "User ID" = $2
-    `;
-
-    const values = [newEmail, id];
-
     try {
-      await this.pool.query(query, values);
+      await this.usersRepository.update({ id }, { email: newEmail });
     } catch {
       console.log('Failed Email Update Operation');
     }
   }
 
   async setAvatarUrl(id: string, newUrl: string): Promise<void> {
-    const query = `
-      UPDATE "User Table"
-      SET "Avatar URL" = $1
-      WHERE "User ID" = $2
-    `;
-
-    const values = [newUrl, id];
-
     try {
-      await this.pool.query(query, values);
+      await this.usersRepository.update({ id }, { avatarUrl: newUrl });
     } catch {
       console.log('Failed Avatar Url Update Operation');
     }
   }
-
+  async getPrefID(userId: string) {
+    const result = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: { preference: true },
+    });
+    return result?.preference.id ?? null;
+  }
   async logIn(username: string, password: string): Promise<User | null> {
-    const query = `
-      SELECT "User ID"
-      FROM "User Table"
-      WHERE "Username" = $1 AND "Password" = $2
-    `;
-
-    const values = [username, password];
-
     try {
-      const results = await this.pool.query(query, values);
-      return results.rows[0] as User;
+      const result = this.usersRepository.findOneBy({ username, password });
+      return result;
     } catch {
       console.log('Failed Log In Operation');
     }
     return null;
   }
 
-  async upsertPreferenceTable(
-    userId: UUID,
-    gameStartNotifPref: boolean,
-    ongoingGameNotifPref: boolean,
-    favTeams: UUID[],
-    favPlayers: UUID[],
-  ) {
-    const query = `
-      INSERT INTO "Preference Table"
-      ("User ID", "Games Starting Notif Pref", "Ongoing Close Games Notif Pref", "Favorite Teams", "Favorite Players")
-      VALUES ($1,$2,$3,$4,$5);
-    `;
-    const values = [
-      userId,
-      gameStartNotifPref,
-      ongoingGameNotifPref,
-      favTeams,
-      favPlayers,
-    ];
-
+  async upsertPreferenceTable(pref: Partial<Preference>) {
     try {
-      await this.pool.query(query, values);
+      await this.preferenceRepository.upsert(pref, ['id']);
     } catch (e) {
       console.log(e);
       console.log('Failed Preference Tables Update Operation');
@@ -163,52 +103,46 @@ export class UserService {
   }
 
   async changeGS(userId: UUID, newBool: boolean) {
-    const query = ` UPDATE "Preference Table"
-       SET "Games Starting Notif Pref" = $1
-       WHERE "User ID" = $2
-    `;
-    const values = [newBool, userId];
-
     try {
-      await this.pool.query(query, values);
+      const prefId = await this.getPrefID(userId);
+      if (!prefId) return;
+      await this.preferenceRepository.update(
+        { id: prefId },
+        { gameStartNotifPref: newBool },
+      );
     } catch {
       console.log('Failed Games Starting Notif Pref Update Operation');
     }
   }
 
   async changeOGC(userId: UUID, newBool: boolean) {
-    const query = ` UPDATE "Preference Table"
-       SET "Ongoing Close Games Notif Pref" = $1
-       WHERE "User ID" = $2
-    `;
-    const values = [newBool, userId];
-
     try {
-      await this.pool.query(query, values);
+      const prefId = await this.getPrefID(userId);
+      if (!prefId) return;
+      await this.preferenceRepository.update(
+        { id: prefId },
+        { ongoingGameNotifPref: newBool },
+      );
     } catch {
       console.log('Failed Ongoing Close Games Notif Update Operation');
     }
   }
 
   async updateFavoriteTeams(userId: UUID, teams: UUID[]): Promise<void> {
-    const query = `
-    UPDATE "Preference Table"
-    SET "Favorite Teams" = $1
-    WHERE "User ID" = $2
-  `;
-    const values = [teams, userId];
     try {
-      await this.pool.query(query, values);
+      const prefId = await this.getPrefID(userId);
+      if (!prefId) return;
+      await this.preferenceRepository.update(
+        { id: prefId },
+        { favTeams: teams },
+      );
     } catch {
       console.log('Failed Favorite Team Update Operation');
     }
   }
   async getUsers() {
     try {
-      const result = await this.pool.query(
-        `SELECT "Username" FROM "User Table"`,
-      );
-      return result.rows as string[];
+      return this.usersRepository.find({ select: { username: true } });
     } catch {
       console.log("Can't connect to database");
     }
