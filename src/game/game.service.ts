@@ -23,10 +23,9 @@ export class GameService {
     return null;
   }
 
-  async createGame(game: Game) {
+  async createGame(game: Partial<Game>) {
     await this.gamesRepository.save(game);
   }
-  //Only get data for inidividual quarters for games past 2023
   async getGameByID(gameId: number) {
     const existing = await this.getGameFromDB(gameId);
     if (existing) {
@@ -38,27 +37,25 @@ export class GameService {
     if (!game) {
       return null;
     }
-    // const response2 = (
-    //   await this.api.nba.getOdds({
-    //     date: game.date,
-    //     game_id: gameId,
-    //   })
-    // ).data[0];
-    const bettingOdds = null;
+    const bettingOdds: Betting[] = [];
     const gameInfo = {
       home_team_id: game.home_team.id,
       visitor_team_id: game.visitor_team.id,
-      date: new Date(game.date),
-      id: game.id,
-      season: game.season,
-      postseason: game.postseason,
-      postponed: false,
-      home_team_score: game.home_team_score,
-      visitor_team_score: game.visitor_team_score,
+      ...game,
       bettingOdds,
     };
     await this.createGame(gameInfo);
-
+    const bettingOddsData = (
+      await this.api.nba.getOdds({
+        date: game.date,
+        game_id: gameId,
+      })
+    ).data;
+    for (const odd of bettingOddsData) {
+      bettingOdds.push(
+        await this.bettingOddsRepository.save({ ...odd, game_id: gameId }),
+      );
+    }
     return await this.getGameFromDB(gameId);
   }
 

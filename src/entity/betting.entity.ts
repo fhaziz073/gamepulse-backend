@@ -1,37 +1,47 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
-
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Game } from './game.entity';
 @Entity({ name: 'Betting Table' })
 export class Betting {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  vender: string;
+  vendor: string;
 
   @Column()
-  spread_home_value: string;
+  live: boolean;
 
   @Column()
-  spread_home_odds: number;
+  type: '2way' | 'spread' | 'over/under';
 
   @Column()
-  spread_away_value: string;
+  odds_decimal_home: string;
 
   @Column()
-  spread_away_odds: number;
+  odds_decimal_visitor: string;
 
   @Column()
-  moneyline_home_odds: number;
+  odds_american_home: string;
 
   @Column()
-  moneyline_away_odds: number;
+  odds_american_visitor: string;
+
+  @Column({ nullable: true })
+  away_spread: string;
+
+  @Column({ nullable: true })
+  over_under: string;
+
+  @ManyToOne(() => Game, (game) => game.bettingOdds)
+  @JoinColumn({ name: 'game_id' })
+  game: Game;
 
   @Column()
-  total_value: string;
-
-  @Column()
-  total_over_odds: number;
-
-  @Column()
-  total_under_odds: number;
+  game_id: number;
 }
