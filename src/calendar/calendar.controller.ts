@@ -7,4 +7,4 @@ export class CalendarController {
   async findUpcomingGames(): Promise<Event[]> {
     return await this.calendarService.findAll();
   }
-}
+} 

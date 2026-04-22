@@ -26,6 +26,6 @@ describe('UserController', () => {
   describe('root', () => {
     it('should be defined', () => {
       expect(userController).toBeDefined();
-    });
+    }); 
   });
 });

@@ -59,4 +59,4 @@ export class UserController {
   async updateFavoriteTeams(@Body() body: { userID: UUID; newTeams: UUID[] }) {
     await this.userService.updateFavoriteTeams(body.userID, body.newTeams);
   }
-}
+} 
