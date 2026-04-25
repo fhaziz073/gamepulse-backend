@@ -19,6 +19,7 @@ import { PlayerModule } from './player/player.module';
 import { GameModule } from './game/game.module';
 import { SearchModule } from './search/search.module';
 import { TeamModule } from './team/team.module';
+import { VisualizationModule } from './visualization/visualization.module';
 @Module({
   imports: [
     AuthModule,
@@ -42,6 +43,7 @@ import { TeamModule } from './team/team.module';
     GameModule,
     SearchModule,
     TeamModule,
+    VisualizationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
