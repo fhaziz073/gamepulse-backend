@@ -102,7 +102,7 @@ export class VisualizationService {
     private readonly statsRepository: Repository<StatEntity>,
   ) {
     this.api = new BalldontlieAPI({
-      apiKey: process.env.BALLDONTLIE_API_KEY ?? '',
+      apiKey: process.env.SPORTS_API_KEY ?? '',
     });
   }
 
