@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Query } from '@nestjs/common';
 import { PlayerService } from './player.service';
 
 @Controller('players')
@@ -9,11 +9,11 @@ export class PlayerController {
     return await this.playerService.getPlayerById(id);
   }
   @Get()
-  async getPlayerByName(@Body() body: { firstName: string; lastName: string }) {
-    return await this.playerService.getPlayerByName(
-      body.firstName,
-      body.lastName,
-    );
+  async getPlayerByName(
+    @Query('firstName') firstName: string,
+    @Query('lastName') lastName: string,
+  ) {
+    return await this.playerService.getPlayerByName(firstName, lastName);
   }
   @Get(':id/stats')
   async getPlayerStats(@Param('id') id: number) {
