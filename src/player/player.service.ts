@@ -42,8 +42,11 @@ export class PlayerService {
     return await this.getPlayerFromDB(playerId);
   }
 
-  async getPlayerByName(playerName: string): Promise<NBAPlayer[]> {
-    const response = await this.api.nba.getPlayers({ first_name: playerName });
+  async getPlayerByName(
+    first_name: string,
+    last_name: string,
+  ): Promise<NBAPlayer[]> {
+    const response = await this.api.nba.getPlayers({ first_name, last_name });
 
     const players = response.data;
 

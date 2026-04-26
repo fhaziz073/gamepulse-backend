@@ -9,8 +9,11 @@ export class PlayerController {
     return await this.playerService.getPlayerById(id);
   }
   @Get()
-  async getPlayerByName(@Body() body: { name: string }) {
-    return await this.playerService.getPlayerByName(body.name);
+  async getPlayerByName(@Body() body: { firstName: string; lastName: string }) {
+    return await this.playerService.getPlayerByName(
+      body.firstName,
+      body.lastName,
+    );
   }
   @Get(':id/stats')
   async getPlayerStats(@Param('id') id: number) {
