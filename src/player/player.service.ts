@@ -55,10 +55,17 @@ export class PlayerService {
     return players;
   }
 
-  async getSeason(playerId: number) {
+  async getAdvanced2026Stats(playerId: number) {
     const player = await this.api.nba.getAdvancedStats({
       seasons: [new Date().getFullYear() - 1],
       player_ids: [playerId],
+    });
+    return player.data;
+  }
+  async get2026StatAvgs(playerId: number) {
+    const player = await this.api.nba.getSeasonAverages({
+      season: new Date().getFullYear() - 1,
+      player_id: playerId,
     });
     return player.data;
   }
