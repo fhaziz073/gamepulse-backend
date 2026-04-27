@@ -7,7 +7,7 @@ export type Event = {
   title: string;
   summary?: string;
 };
-
+ 
 @Injectable()
 export class CalendarService {
   private apiKey = process.env.SPORTS_API_KEY as string;
