@@ -46,7 +46,10 @@ export class PlayerService {
     first_name: string,
     last_name: string,
   ): Promise<NBAPlayer[]> {
-    const response = await this.api.nba.getPlayers({ first_name, last_name });
+    const response = await this.api.nba.getActivePlayers({
+      first_name,
+      last_name,
+    });
 
     const players = response.data;
 

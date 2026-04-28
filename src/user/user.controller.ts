@@ -56,7 +56,15 @@ export class UserController {
     await this.userService.changeOGC(body.userID, body.newOGC);
   }
   @Patch('pref/teams')
-  async updateFavoriteTeams(@Body() body: { userID: UUID; newTeams: UUID[] }) {
+  async updateFavoriteTeams(
+    @Body() body: { userID: UUID; newTeams: number[] },
+  ) {
     await this.userService.updateFavoriteTeams(body.userID, body.newTeams);
   }
-} 
+  @Patch('pref/players')
+  async updateFavoritePlayers(
+    @Body() body: { userID: UUID; newPlayers: number[] },
+  ) {
+    await this.userService.updateFavoritePlayers(body.userID, body.newPlayers);
+  }
+}

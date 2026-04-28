@@ -11,9 +11,14 @@ export class Preference {
   @Column({ name: 'Ongoing Close Games Notif Pref', default: false })
   ongoingGameNotifPref: boolean;
 
-  @Column({ name: 'Favorite Teams', type: 'uuid', array: true, default: [] })
-  favTeams: string[];
+  @Column({ name: 'Favorite Teams', type: 'int', array: true, default: [] })
+  favTeams: number[];
 
-  @Column({ name: 'Favorite Players', type: 'uuid', array: true, default: [] })
-  favPlayers: string[];
+  @Column({
+    name: 'Favorite Players',
+    type: 'int',
+    array: true,
+    default: [],
+  })
+  favPlayers: number[];
 }

@@ -128,7 +128,7 @@ export class UserService {
     }
   }
 
-  async updateFavoriteTeams(userId: UUID, teams: UUID[]): Promise<void> {
+  async updateFavoriteTeams(userId: UUID, teams: number[]): Promise<void> {
     try {
       const prefId = await this.getPrefID(userId);
       if (!prefId) return;
@@ -136,8 +136,23 @@ export class UserService {
         { id: prefId },
         { favTeams: teams },
       );
-    } catch {
+    } catch (e) {
       console.log('Failed Favorite Team Update Operation');
+      console.log(e);
+    }
+  }
+
+  async updateFavoritePlayers(userId: UUID, players: number[]): Promise<void> {
+    try {
+      const prefId = await this.getPrefID(userId);
+      if (!prefId) return;
+      await this.preferenceRepository.update(
+        { id: prefId },
+        { favPlayers: players },
+      );
+    } catch (e) {
+      console.log('Failed Favorite Player Update Operation');
+      console.log(e);
     }
   }
   async getUsers() {

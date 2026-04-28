@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Query } from '@nestjs/common';
 import { TeamService } from './team.service';
 
 @Controller('teams')
@@ -9,12 +9,8 @@ export class TeamController {
     return await this.teamService.getTeamById(id);
   }
   @Get()
-  async getAllPlayers(
-    @Body()
-    body: {
-      ids: number[];
-    },
-  ) {
-    return await this.teamService.getPlayers(body.ids);
+  async getAllPlayers(@Query('ids') ids: number | number[]) {
+    const idsArray = Array.isArray(ids) ? ids : [ids];
+    return await this.teamService.getPlayers(idsArray);
   }
 }

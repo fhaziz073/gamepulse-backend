@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BalldontlieAPI } from '@balldontlie/sdk';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Team } from 'src/entity/team.entity';
@@ -43,7 +47,13 @@ export class TeamService {
   }
 
   async getPlayers(team_ids: number[]) {
-    const players = await this.api.nba.getPlayers({ team_ids });
-    return players;
+    if (!(Array.isArray(team_ids) && team_ids.length > 0)) {
+      throw new BadRequestException('Array is malformed');
+    }
+    const players = await this.api.nba.getActivePlayers({ team_ids });
+    if (players.data.length === 0) {
+      throw new NotFoundException('Team id array contains no valid id');
+    }
+    return players.data;
   }
 }

@@ -13,7 +13,7 @@ export class CalendarService {
   private apiKey = process.env.SPORTS_API_KEY as string;
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
 
-  async findAll(): Promise<Event[]> {
+  async findAll(team_ids: number[]): Promise<Event[]> {
     const events: Event[] = [];
     let date1 = new Date();
     const offset = date1.getTimezoneOffset();
@@ -23,7 +23,7 @@ export class CalendarService {
     const offset2 = date2.getTimezoneOffset();
     date2 = new Date(date2.getTime() - offset2 * 60 * 1000);
     const games = await this.api.nba.getGames({
-      team_ids: [1],
+      team_ids: team_ids,
       start_date: date1.toISOString().split('T')[0],
       end_date: date2.toISOString().split('T')[0],
     });
