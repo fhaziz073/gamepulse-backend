@@ -72,4 +72,18 @@ export class PlayerService {
     });
     return player.data;
   }
+  async get2026Stats(playerId: number) {
+    const playerStats = await this.api.nba.getStats({
+      seasons: [new Date().getFullYear() - 1],
+      player_ids: [playerId],
+      start_date: '2026-04-01',
+    });
+    return playerStats.data.reverse();
+  }
+  async getInjuryStatus(playerId: number) {
+    const player = await this.api.nba.getPlayerInjuries({
+      player_ids: [playerId],
+    });
+    return player.data;
+  }
 }

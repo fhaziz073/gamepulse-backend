@@ -23,4 +23,12 @@ export class PlayerController {
   async getPlayerSeasonalStatAvgs(@Param('id') id: number) {
     return await this.playerService.get2026StatAvgs(id);
   }
+  @Get(':id/stats')
+  async getPlayerStats(@Param('id') id: number) {
+    return await this.playerService.get2026Stats(id);
+  }
+  @Get(':id/injury')
+  async getPlayerInjury(@Param('id') id: number) {
+    return await this.playerService.getInjuryStatus(id);
+  }
 }
