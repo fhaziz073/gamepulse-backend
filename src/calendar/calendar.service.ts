@@ -32,43 +32,23 @@ export class CalendarService {
       const gameLengthInMs = 2.5 * 60 * 60 * 1000;
       const gameStart = new Date(game.status);
       const gameEnd = new Date(gameStart.getTime() + gameLengthInMs);
-      if (gameStart instanceof Date && !isNaN(gameStart.getTime())) {
-        events.push({
-          start:
-            game.date +
-            ' ' +
-            gameStart.getHours().toString().padStart(2, '0') +
-            ':' +
-            gameStart.getMinutes().toString().padStart(2, '0') +
-            ':' +
-            gameStart.getSeconds().toString().padStart(2, '0'),
-          end:
-            game.date +
-            ' ' +
-            gameEnd.getHours().toString().padStart(2, '0') +
-            ':' +
-            gameEnd.getMinutes().toString().padStart(2, '0') +
-            ':' +
-            gameEnd.getSeconds().toString().padStart(2, '0'),
-          title: `${game.visitor_team.name} at ${game.home_team.name}`,
-        });
-      } else {
-        const currentTime = new Date();
-        const currentTimeString =
-          game.date +
-          ' ' +
-          currentTime.getHours().toString().padStart(2, '0') +
-          ':' +
-          currentTime.getMinutes().toString().padStart(2, '0') +
-          ':' +
-          currentTime.getSeconds().toString().padStart(2, '0');
-        events.push({
-          start: currentTimeString,
-          end: currentTimeString,
-          title: `${game.visitor_team.name} at ${game.home_team.name}`,
-          summary: game.status,
-        });
-      }
+      const formatDateTime = (d: Date) => {
+        const date =
+          `${d.getUTCFullYear()}-` +
+          `${(d.getUTCMonth() + 1).toString().padStart(2, '0')}-` +
+          `${d.getUTCDate().toString().padStart(2, '0')}`;
+        const time =
+          `${d.getUTCHours().toString().padStart(2, '0')}:` +
+          `${d.getUTCMinutes().toString().padStart(2, '0')}:` +
+          `${d.getUTCSeconds().toString().padStart(2, '0')}`;
+        return `${date} ${time}`;
+      };
+
+      events.push({
+        start: formatDateTime(gameStart),
+        end: formatDateTime(gameEnd),
+        title: `${game.visitor_team.name} at ${game.home_team.name}`,
+      });
     }
     return events;
   }
