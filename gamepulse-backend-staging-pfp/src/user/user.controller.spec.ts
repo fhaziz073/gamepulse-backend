@@ -1,0 +1,31 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
+
+describe('UserController', () => {
+  let userController: UserController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [UserController],
+      providers: [
+        UserService,
+        // Add this provider to "satisfy" the UserService
+        {
+          provide: 'PG_CONNECTION',
+          useValue: {
+            query: jest.fn(), // Mock the database query method
+          },
+        },
+      ],
+    }).compile();
+
+    userController = module.get<UserController>(UserController);
+  });
+
+  describe('root', () => {
+    it('should be defined', () => {
+      expect(userController).toBeDefined();
+    }); 
+  });
+});
