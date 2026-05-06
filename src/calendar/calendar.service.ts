@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BalldontlieAPI } from '@balldontlie/sdk';
+import { BalldontlieAPI, NBAGame } from '@balldontlie/sdk';
 import 'dotenv/config';
 export type Event = {
   start: string;
@@ -51,5 +51,21 @@ export class CalendarService {
       });
     }
     return events;
+  }
+  async getNextGame(team_ids: number[]): Promise<NBAGame> {
+    let date1 = new Date();
+    const offset = date1.getTimezoneOffset();
+    date1 = new Date(date1.getTime() - offset * 60 * 1000);
+    let date2 = new Date();
+    date2.setMonth(date2.getMonth() + 1);
+    const offset2 = date2.getTimezoneOffset();
+    date2 = new Date(date2.getTime() - offset2 * 60 * 1000);
+    return (
+      await this.api.nba.getGames({
+        team_ids: team_ids,
+        start_date: date1.toISOString().split('T')[0],
+        end_date: date2.toISOString().split('T')[0],
+      })
+    ).data[0];
   }
 }
