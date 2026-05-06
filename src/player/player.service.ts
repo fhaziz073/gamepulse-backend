@@ -26,10 +26,6 @@ export class PlayerService {
     await this.playersRepository.save(player);
   }
   async getPlayerById(playerId: number) {
-    const existing = await this.getPlayerFromDB(playerId);
-    if (existing) {
-      return existing;
-    }
     const response = await this.api.nba.getPlayer(playerId);
     const player = response.data;
 
@@ -37,9 +33,7 @@ export class PlayerService {
       return null;
     }
 
-    await this.createPlayer(player);
-
-    return await this.getPlayerFromDB(playerId);
+    return player;
   }
 
   async getPlayerByName(
