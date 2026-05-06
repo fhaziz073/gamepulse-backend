@@ -80,4 +80,16 @@ export class PlayerService {
     });
     return player.data;
   }
+  async getHeadshot(firstName: string, lastName: string) {
+    const res = await fetch(
+      `https://site.api.espn.com/apis/common/v3/search?query=${firstName}+${lastName}&limit=1&type=player&sport=basketball&league=nba`,
+    );
+    const data = await res.json();
+    const playerId = data.items[0].id;
+    const imageRes = await fetch(
+      `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${playerId}.png`,
+    );
+    const arrayBuffer = await imageRes.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  }
 }
