@@ -46,4 +46,8 @@ export class PlayerController {
   async getPlayerInjury(@Param('id') id: number) {
     return await this.playerService.getInjuryStatus(id);
   }
+  @Get(':id/stats/:gameId')
+  async getGameStats(@Param('id') id: number, @Param('gameId') gameId: number) {
+    return await this.playerService.getGameStats(id, gameId);
+  }
 }

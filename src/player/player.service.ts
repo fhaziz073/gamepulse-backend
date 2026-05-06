@@ -92,4 +92,12 @@ export class PlayerService {
     const arrayBuffer = await imageRes.arrayBuffer();
     return Buffer.from(arrayBuffer);
   }
+
+  async getGameStats(playerId: number, gameId: number) {
+    const playerStats = await this.api.nba.getStats({
+      player_ids: [Number(playerId)],
+      game_ids: [Number(gameId)],
+    });
+    return playerStats.data[0];
+  }
 }
