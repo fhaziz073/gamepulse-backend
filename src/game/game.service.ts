@@ -26,11 +26,7 @@ export class GameService {
   async createGame(game: Partial<Game>) {
     await this.gamesRepository.save(game);
   }
-  async getGameByID(gameId: number) {
-    const existing = await this.getGameFromDB(gameId);
-    if (existing) {
-      return existing;
-    }
+  async getGameByID(gameId: number): Promise<NBAGame | null> {
     const response = await this.api.nba.getGame(gameId);
     const game = response.data;
 
@@ -56,17 +52,17 @@ export class GameService {
         await this.bettingOddsRepository.save({ ...odd, game_id: gameId }),
       );
     }
-    return await this.getGameFromDB(gameId);
+    return game;
   }
 
   async getHomeTeam(gameId: number) {
     const game = await this.getGameByID(gameId);
-    return game?.home_team_id;
+    return game?.home_team;
   }
 
   async getAwayTeam(gameId: number) {
     const game = await this.getGameByID(gameId);
-    return game?.visitor_team_id;
+    return game?.visitor_team;
   }
 
   async getHomeScore(gameId: number) {
