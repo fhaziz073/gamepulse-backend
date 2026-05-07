@@ -14,7 +14,10 @@ export class UserService {
   ) {}
   async getUserFromDB(userId: string): Promise<User | null> {
     try {
-      const result = await this.usersRepository.findOneBy({ username: userId });
+      const result = await this.usersRepository.findOne({
+        where: { username: userId },
+        relations: ['preference'],
+      });
       return result;
     } catch {
       console.log("Can't connect to database");
