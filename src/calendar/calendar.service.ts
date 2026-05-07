@@ -53,28 +53,23 @@ export class CalendarService {
     return events;
   }
   async getNextGame(team_ids: number[]): Promise<NBAGame> {
-    let date1 = new Date();
-    const offset = date1.getTimezoneOffset();
-    date1 = new Date(date1.getTime() - offset * 60 * 1000);
-    let date2 = new Date();
-    date2.setMonth(date2.getMonth() + 1);
-    const offset2 = date2.getTimezoneOffset();
-    date2 = new Date(date2.getTime() - offset2 * 60 * 1000);
-    return (
-      await this.api.nba.getGames({
-        team_ids: team_ids,
-        start_date: date1.toISOString().split('T')[0],
-        end_date: date2.toISOString().split('T')[0],
-      })
-    ).data[0];
+    const today = new Date().toLocaleDateString('en-CA');
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const future = nextMonth.toLocaleDateString('en-CA');
+
+    const games = await this.api.nba.getGames({
+      team_ids,
+      start_date: today,
+      end_date: future,
+    });
+    return games.data[0];
   }
   async getTodaysGames(): Promise<NBAGame[]> {
-    let date1 = new Date();
-    const offset = date1.getTimezoneOffset();
-    date1 = new Date(date1.getTime() - offset * 60 * 1000);
+    const today = new Date().toLocaleDateString('en-CA');
     return (
       await this.api.nba.getGames({
-        dates: [date1.toISOString().split('T')[0]],
+        dates: [today],
       })
     ).data;
   }
