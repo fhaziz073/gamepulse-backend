@@ -4,6 +4,10 @@ import { NBAGame } from '@balldontlie/sdk';
 @Controller('calendar')
 export class CalendarController {
   constructor(private calendarService: CalendarService) {}
+  @Get('today')
+  async getTodaysGames(): Promise<NBAGame[]> {
+    return await this.calendarService.getTodaysGames();
+  }
   @Get(':id')
   async findUpcomingGames(@Param('id') id: number): Promise<Event[]> {
     return await this.calendarService.findAll([id]);

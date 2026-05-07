@@ -68,4 +68,14 @@ export class CalendarService {
       })
     ).data[0];
   }
+  async getTodaysGames(): Promise<NBAGame[]> {
+    let date1 = new Date();
+    const offset = date1.getTimezoneOffset();
+    date1 = new Date(date1.getTime() - offset * 60 * 1000);
+    return (
+      await this.api.nba.getGames({
+        dates: [date1.toISOString().split('T')[0]],
+      })
+    ).data;
+  }
 }
