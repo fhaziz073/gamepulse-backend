@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BalldontlieAPI } from '@balldontlie/sdk';
+import { BalldontlieAPI, NBAGame } from '@balldontlie/sdk';
 import 'dotenv/config';
 export type Event = {
   start: string;
@@ -13,7 +13,7 @@ export class CalendarService {
   private apiKey = process.env.SPORTS_API_KEY as string;
   private api = new BalldontlieAPI({ apiKey: this.apiKey });
 
-  async findAll(): Promise<Event[]> {
+  async findAll(team_ids: number[]): Promise<Event[]> {
     const events: Event[] = [];
     let date1 = new Date();
     const offset = date1.getTimezoneOffset();
@@ -23,7 +23,7 @@ export class CalendarService {
     const offset2 = date2.getTimezoneOffset();
     date2 = new Date(date2.getTime() - offset2 * 60 * 1000);
     const games = await this.api.nba.getGames({
-      team_ids: [1],
+      team_ids: team_ids,
       start_date: date1.toISOString().split('T')[0],
       end_date: date2.toISOString().split('T')[0],
     });
@@ -32,44 +32,45 @@ export class CalendarService {
       const gameLengthInMs = 2.5 * 60 * 60 * 1000;
       const gameStart = new Date(game.status);
       const gameEnd = new Date(gameStart.getTime() + gameLengthInMs);
-      if (gameStart instanceof Date && !isNaN(gameStart.getTime())) {
-        events.push({
-          start:
-            game.date +
-            ' ' +
-            gameStart.getHours().toString().padStart(2, '0') +
-            ':' +
-            gameStart.getMinutes().toString().padStart(2, '0') +
-            ':' +
-            gameStart.getSeconds().toString().padStart(2, '0'),
-          end:
-            game.date +
-            ' ' +
-            gameEnd.getHours().toString().padStart(2, '0') +
-            ':' +
-            gameEnd.getMinutes().toString().padStart(2, '0') +
-            ':' +
-            gameEnd.getSeconds().toString().padStart(2, '0'),
-          title: `${game.visitor_team.name} at ${game.home_team.name}`,
-        });
-      } else {
-        const currentTime = new Date();
-        const currentTimeString =
-          game.date +
-          ' ' +
-          currentTime.getHours().toString().padStart(2, '0') +
-          ':' +
-          currentTime.getMinutes().toString().padStart(2, '0') +
-          ':' +
-          currentTime.getSeconds().toString().padStart(2, '0');
-        events.push({
-          start: currentTimeString,
-          end: currentTimeString,
-          title: `${game.visitor_team.name} at ${game.home_team.name}`,
-          summary: game.status,
-        });
-      }
+      const formatDateTime = (d: Date) => {
+        const date =
+          `${d.getUTCFullYear()}-` +
+          `${(d.getUTCMonth() + 1).toString().padStart(2, '0')}-` +
+          `${d.getUTCDate().toString().padStart(2, '0')}`;
+        const time =
+          `${d.getUTCHours().toString().padStart(2, '0')}:` +
+          `${d.getUTCMinutes().toString().padStart(2, '0')}:` +
+          `${d.getUTCSeconds().toString().padStart(2, '0')}`;
+        return `${date} ${time}`;
+      };
+
+      events.push({
+        start: formatDateTime(gameStart),
+        end: formatDateTime(gameEnd),
+        title: `${game.visitor_team.name} at ${game.home_team.name}`,
+      });
     }
     return events;
+  }
+  async getNextGame(team_ids: number[]): Promise<NBAGame> {
+    const today = new Date().toLocaleDateString('en-CA');
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const future = nextMonth.toLocaleDateString('en-CA');
+
+    const games = await this.api.nba.getGames({
+      team_ids,
+      start_date: today,
+      end_date: future,
+    });
+    return games.data[0];
+  }
+  async getTodaysGames(): Promise<NBAGame[]> {
+    const today = new Date().toLocaleDateString('en-CA');
+    return (
+      await this.api.nba.getGames({
+        dates: [today],
+      })
+    ).data;
   }
 }
